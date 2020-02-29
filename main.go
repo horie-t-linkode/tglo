@@ -20,7 +20,9 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 4 {
+	argc := len(os.Args)
+	if ! (argc == 3 || argc == 4) {
+		println("usage:", os.Args[0], "API_TOKEN WORKSPACE_ID")
 		println("usage:", os.Args[0], "API_TOKEN WORKSPACE_ID yyyy-mm-dd")
 		return
 	}
@@ -32,19 +34,23 @@ func main() {
 		return
 	}
 
-	date, err := time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", os.Args[3]))
-	if err != nil {
-		println("error:", err)
-		return
+	var date time.Time
+	if argc == 4 {
+		date, err = time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", os.Args[3]))
+		if err != nil {
+			println("error:", err)
+			return
+		}
+	} else {
+		date = time.Now()
+    	date = date.Truncate( time.Hour ).Add( - time.Duration(date.Hour()) * time.Hour )
 	}
+
 	println(date.Format(time.ANSIC))
 	println(date.Format(time.RFC3339))
 
 	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
 
-	//t := time.Now()
-    //t = t.Truncate( time.Hour ).Add( - time.Duration(t.Hour()) * time.Hour )
-	//println(t.Format(time.ANSIC))
 	
 	nextDate := date.AddDate(0, 0, 1)
 	nextDate = nextDate.Truncate( time.Hour ).Add( - time.Duration(nextDate.Hour()) * time.Hour )
