@@ -11,7 +11,6 @@ The API token can be retrieved from a user's account information page at toggl.c
 package main
 
 import (
-	//"encoding/json"
 	"os"
 	"github.com/jason0x43/go-toggl"
 	. "github.com/ahmetb/go-linq"
@@ -21,20 +20,10 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 3 {
-		println("usage:", os.Args[0], "API_TOKEN WORKSPACE_ID")
+	if len(os.Args) != 4 {
+		println("usage:", os.Args[0], "API_TOKEN WORKSPACE_ID yyyy-mm-dd")
 		return
 	}
-
-	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
-
-	t := time.Now()
-    t = t.Truncate( time.Hour ).Add( - time.Duration(t.Hour()) * time.Hour )
-	println(t.Format(time.ANSIC))
-	
-	y := time.Now().AddDate(0, 0, -1)
-	y = y.Truncate( time.Hour ).Add( - time.Duration(y.Hour()) * time.Hour )
-	println(y.Format(time.ANSIC))
 
 	apiToken := os.Args[1]
 	workspaceId, err := strconv.Atoi(os.Args[2])
@@ -42,6 +31,26 @@ func main() {
 		println("error:", err)
 		return
 	}
+
+	date, err := time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", os.Args[3]))
+	if err != nil {
+		println("error:", err)
+		return
+	}
+	println(date.Format(time.ANSIC))
+	println(date.Format(time.RFC3339))
+
+	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
+
+	//t := time.Now()
+    //t = t.Truncate( time.Hour ).Add( - time.Duration(t.Hour()) * time.Hour )
+	//println(t.Format(time.ANSIC))
+	
+	nextDate := date.AddDate(0, 0, 1)
+	nextDate = nextDate.Truncate( time.Hour ).Add( - time.Duration(nextDate.Hour()) * time.Hour )
+	println(nextDate.Format(time.ANSIC))
+
+
 
 	session := toggl.OpenSession(apiToken)
 
@@ -51,24 +60,16 @@ func main() {
 		return
 	}
 
-	timeEntries, err := session.GetTimeEntries(y, t)
+	timeEntries, err := session.GetTimeEntries(date, nextDate)
 	if err != nil {
 		println("error:", err)
 		return
 	}
-/*
-	account, err := session.GetAccount()
-	if err != nil {
-		println("error:", err)
-		return
-	}
-*/
 
-	fmt.Printf("# %sの実績\n", y.Format("2006-01-02"))
+	fmt.Printf("# %sの実績\n", date.Format("2006-01-02"))
 
 	projectMap := makeProjectMap(projects)
 
-//	From(account.Data.TimeEntries).ForEachT(func(te toggl.TimeEntry) {
 	durationSum := int64(0)
 	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
 		start := te.Start.In(jst)
