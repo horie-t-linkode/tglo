@@ -17,47 +17,72 @@ import (
 	. "github.com/ahmetb/go-linq"
 	"fmt"
 	"time"
+	"strconv"
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		println("usage:", os.Args[0], "API_TOKEN")
+	if len(os.Args) != 3 {
+		println("usage:", os.Args[0], "API_TOKEN WORKSPACE_ID")
 		return
 	}
 
 	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
 
-	session := toggl.OpenSession(os.Args[1])
+	t := time.Now()
+    t = t.Truncate( time.Hour ).Add( - time.Duration(t.Hour()) * time.Hour )
+	println(t.Format(time.ANSIC))
+	
+	y := time.Now().AddDate(0, 0, -1)
+	y = y.Truncate( time.Hour ).Add( - time.Duration(y.Hour()) * time.Hour )
+	println(y.Format(time.ANSIC))
 
-	account, err := session.GetAccount()
+	apiToken := os.Args[1]
+	workspaceId, err := strconv.Atoi(os.Args[2])
 	if err != nil {
 		println("error:", err)
 		return
 	}
 
-	//projectMap := map[int]string{}
-	projectMap := makeProjectMap(account)
+	session := toggl.OpenSession(apiToken)
+
+	projects, err := session.GetProjects(workspaceId)
+	if err != nil {
+		println("error:", err)
+		return
+	}
+
+	timeEntries, err := session.GetTimeEntries(y, t)
+	if err != nil {
+		println("error:", err)
+		return
+	}
 /*
-	From(account.Data.Projects).ToMapByT(&projectMap,
-        func(p toggl.Project) int { return p.ID },
-        func(p toggl.Project) string { return p.Name },
-    )
+	account, err := session.GetAccount()
+	if err != nil {
+		println("error:", err)
+		return
+	}
 */
 
-	From(account.Data.TimeEntries).ForEachT(func(te toggl.TimeEntry) {	
-		//data, _ := json.MarshalIndent(te.(toggl.TimeEntry).Description, "", "    ")
-		//println("account:", string(data))
+	fmt.Printf("# %sの実績\n", y.Format("2006-01-02"))
 
+	projectMap := makeProjectMap(projects)
+
+//	From(account.Data.TimeEntries).ForEachT(func(te toggl.TimeEntry) {
+	durationSum := int64(0)
+	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
 		start := te.Start.In(jst)
 		stop := te.Stop.In(jst)
 		duration := time.Duration(te.Duration) * time.Second
+		durationSum = durationSum + te.Duration
 		fmt.Printf("- [%s] %02d:%02d-%02d:%02d %v %v\n", fmtDurationHHMM(duration), start.Hour(), start.Minute(), stop.Hour(), stop.Minute(), projectMap[te.Pid], te.Description)
 	})
+	fmt.Printf("total %s\n", fmtDurationHHMM(time.Duration(durationSum) * time.Second))
 }
 
-func makeProjectMap(account toggl.Account) map[int]string {
+func makeProjectMap(projects []toggl.Project) map[int]string {
 	projectMap := map[int]string{}
-	From(account.Data.Projects).ToMapByT(&projectMap,
+	From(projects).ToMapByT(&projectMap,
         func(p toggl.Project) int { return p.ID },
         func(p toggl.Project) string { return p.Name },
 	)
