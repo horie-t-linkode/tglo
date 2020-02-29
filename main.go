@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"time"
 	"strconv"
+	"text/template"
 )
 
 func main() {
@@ -56,7 +57,21 @@ func main() {
 	nextDate = nextDate.Truncate( time.Hour ).Add( - time.Duration(nextDate.Hour()) * time.Hour )
 	println(nextDate.Format(time.ANSIC))
 
+	const letter = `
+# {{.Date}}の実績
+total {{.DurationSum}}
+{{range $var := .Descriptions -}}
+  {{$var}}
+{{end -}}
+`
+	tmpl := template.Must(template.New("letter").Parse(letter))
 
+	type Content struct {
+		Date string
+		DurationSum string
+		Descriptions []string
+	}
+	content := Content{Date: date.Format("2006-01-02")}
 
 	session := toggl.OpenSession(apiToken)
 
@@ -65,6 +80,7 @@ func main() {
 		println("error:", err)
 		return
 	}
+	projectMap := makeProjectMap(projects)
 
 	timeEntries, err := session.GetTimeEntries(date, nextDate)
 	if err != nil {
@@ -72,19 +88,22 @@ func main() {
 		return
 	}
 
-	fmt.Printf("# %sの実績\n", date.Format("2006-01-02"))
-
-	projectMap := makeProjectMap(projects)
-
 	durationSum := int64(0)
 	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
 		start := te.Start.In(jst)
 		stop := te.Stop.In(jst)
 		duration := time.Duration(te.Duration) * time.Second
 		durationSum = durationSum + te.Duration
-		fmt.Printf("- [%s] %02d:%02d-%02d:%02d %v %v\n", fmtDurationHHMM(duration), start.Hour(), start.Minute(), stop.Hour(), stop.Minute(), projectMap[te.Pid], te.Description)
+		s := fmt.Sprintf("- [%s] %02d:%02d - %02d:%02d %v %v", fmtDurationHHMM(duration), start.Hour(), start.Minute(), stop.Hour(), stop.Minute(), projectMap[te.Pid], te.Description)
+		content.Descriptions = append(content.Descriptions, s)
 	})
-	fmt.Printf("total %s\n", fmtDurationHHMM(time.Duration(durationSum) * time.Second))
+	content.DurationSum = fmtDurationHHMM(time.Duration(durationSum) * time.Second)
+
+	err = tmpl.Execute(os.Stdout, content)
+	if err != nil {
+		println("executing template:", err)
+		return
+	}
 }
 
 func makeProjectMap(projects []toggl.Project) map[int]string {
