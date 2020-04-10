@@ -18,6 +18,7 @@ import (
 	"time"
 	"strconv"
 	"text/template"
+	"strings"
 )
 
 func main() {
@@ -58,18 +59,24 @@ func main() {
 	println(nextDate.Format(time.ANSIC))
 
 	const letter = `
+@@@
 # {{.Date}}の実績
 total {{.DurationSum}}
-{{range $var := .Descriptions -}}
+{{range $var := .TimeEntries -}}
   {{$var}}
 {{end -}}
+@@@
+・疑問点や気にかかっていること
+
+・明日の作業予定
 `
-	tmpl := template.Must(template.New("letter").Parse(letter))
+
+	tmpl := template.Must(template.New("letter").Parse(strings.Replace(letter, "@", "`", -1)))
 
 	type Content struct {
 		Date string
 		DurationSum string
-		Descriptions []string
+		TimeEntries []string
 	}
 	content := Content{Date: date.Format("2006-01-02")}
 
@@ -95,7 +102,7 @@ total {{.DurationSum}}
 		duration := time.Duration(te.Duration) * time.Second
 		durationSum = durationSum + te.Duration
 		s := fmt.Sprintf("- [%s] %02d:%02d - %02d:%02d %v %v", fmtDurationHHMM(duration), start.Hour(), start.Minute(), stop.Hour(), stop.Minute(), projectMap[te.Pid], te.Description)
-		content.Descriptions = append(content.Descriptions, s)
+		content.TimeEntries = append(content.TimeEntries, s)
 	})
 	content.DurationSum = fmtDurationHHMM(time.Duration(durationSum) * time.Second)
 
