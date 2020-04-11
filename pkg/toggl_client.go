@@ -11,7 +11,10 @@ import (
 	"io"
 )
 
-func Process(apiToken string, workspaceId int, date time.Time, w io.Writer) (err error) {
+func ProcessDay(apiToken string, workspaceId int, dateS string, w io.Writer) (err error) {
+
+	date, err := time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", dateS))
+	if err != nil { return err }
 
 	w.Write([]byte(fmt.Sprintln(date.Format(time.ANSIC))))
 	w.Write([]byte(fmt.Sprintln(date.Format(time.RFC3339))))
@@ -48,9 +51,7 @@ total {{.DurationSum}}
 	session := toggl.OpenSession(apiToken)
 
 	projects, err := session.GetProjects(workspaceId)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	projectMap := makeProjectMap(projects)
 
 	timeEntries, err := session.GetTimeEntries(date, nextDate)

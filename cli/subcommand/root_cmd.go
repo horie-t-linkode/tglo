@@ -1,6 +1,7 @@
 package subcommand
 
 import (
+  "errors"
   "fmt"
   "os"
   "strconv"
@@ -19,13 +20,22 @@ type MyToggl struct {
 
 func readConfig() (me *MyToggl, err error) {
   _ = godotenv.Load()
-  fmt.Println(os.Getenv("TGL_APITOKEN"))
-  fmt.Println(os.Getenv("TGL_WORKSPACEID"))
-  workspaceId, err := strconv.Atoi(os.Getenv("TGL_WORKSPACEID"))
-  if err != nil { return nil, err }
+  apiToken := os.Getenv("TGL_APITOKEN")
+  if apiToken == "" {
+    return nil, errors.New(fmt.Sprintf("TGL_APITOKEN is empty"))
+  }
+  workSpaceIdS := os.Getenv("TGL_WORKSPACEID")
+  if workSpaceIdS == "" {
+    return nil, errors.New(fmt.Sprintf("TGL_WORKSPACEID is empty"))
+  }
+  workspaceId, err := strconv.Atoi(workSpaceIdS)
+  if err != nil { 
+    return nil, errors.New(fmt.Sprintf("TGL_WORKSPACEID: %s", err.Error()))
+  }
 
-  return &MyToggl{ApiToken: os.Getenv("TGL_APITOKEN"), WorkSpaceId: workspaceId}, nil
+  return &MyToggl{ApiToken: apiToken, WorkSpaceId: workspaceId}, nil
 }
+
 
 func NewRootCommand() *cobra.Command {
   me := &cobra.Command{
