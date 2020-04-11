@@ -18,28 +18,9 @@ func ProcessDay(apiToken string, workspaceId int, dateS string, w io.Writer) (er
 
 	w.Write([]byte(fmt.Sprintln(date.Format(time.ANSIC))))
 	w.Write([]byte(fmt.Sprintln(date.Format(time.RFC3339))))
-
-	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
-
 	
-	nextDate := date.AddDate(0, 0, 1)
-	nextDate = nextDate.Truncate( time.Hour ).Add( - time.Duration(nextDate.Hour()) * time.Hour )
-	w.Write([]byte(fmt.Sprintln(nextDate.Format(time.ANSIC))))
-
-	const letter = `
-@@@
-# {{.Date}}の実績
-total {{.DurationSum}}
-{{range $var := .TimeEntries -}}
-  {{$var}}
-{{end -}}
-@@@
-・疑問点や気にかかっていること
-
-・明日の作業予定
-`
-
-	tmpl := template.Must(template.New("letter").Parse(strings.Replace(letter, "@", "`", -1)))
+	nextDay := nextDay(date)
+	w.Write([]byte(fmt.Sprintln(nextDay.Format(time.ANSIC))))
 
 	type Content struct {
 		Date string
@@ -54,15 +35,13 @@ total {{.DurationSum}}
 	if err != nil { return err }
 	projectMap := makeProjectMap(projects)
 
-	timeEntries, err := session.GetTimeEntries(date, nextDate)
-	if err != nil {
-		return err
-	}
+	timeEntries, err := session.GetTimeEntries(date, nextDay)
+	if err != nil { return err }
 
 	durationSum := int64(0)
 	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
-		start := te.Start.In(jst)
-		stop := te.Stop.In(jst)
+		start := te.Start.In(jst())
+		stop := te.Stop.In(jst())
 		duration := time.Duration(te.Duration) * time.Second
 		durationSum = durationSum + te.Duration
 		s := fmt.Sprintf("- [%s] %02d:%02d - %02d:%02d %v %v", fmtDurationHHMM(duration), start.Hour(), start.Minute(), stop.Hour(), stop.Minute(), projectMap[te.Pid], te.Description)
@@ -70,12 +49,19 @@ total {{.DurationSum}}
 	})
 	content.DurationSum = fmtDurationHHMM(time.Duration(durationSum) * time.Second)
 
-	err = tmpl.Execute(w, content)
-	if err != nil {
-		return err
-	}
+	err = dayTemplate().Execute(w, content)
+	if err != nil { return err }
 
 	return nil
+}
+
+func nextDay(date time.Time) (time.Time) {
+	nextDay := date.AddDate(0, 0, 1)
+	return nextDay.Truncate( time.Hour ).Add( - time.Duration(nextDay.Hour()) * time.Hour )
+}
+
+func jst() *time.Location {
+	return time.FixedZone("Asia/Tokyo", 9*60*60)
 }
 
 func makeProjectMap(projects []toggl.Project) map[int]string {
@@ -93,4 +79,21 @@ func fmtDurationHHMM(d time.Duration) string {
     d -= h * time.Hour
     m := d / time.Minute
     return fmt.Sprintf("%02d:%02d", h, m)
+}
+
+func dayTemplate() *template.Template {
+	const letter = `
+@@@
+# {{.Date}}の実績
+total {{.DurationSum}}
+{{range $var := .TimeEntries -}}
+  {{$var}}
+{{end -}}
+@@@
+・疑問点や気にかかっていること
+
+・明日の作業予定
+`
+
+	return template.Must(template.New("letter").Parse(strings.Replace(letter, "@", "`", -1)))
 }
