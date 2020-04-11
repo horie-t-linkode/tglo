@@ -1,62 +1,27 @@
-/*
 
-The toggl command will display a user's Toggl account information.
-
-Usage:
-    toggl API_TOKEN
-
-The API token can be retrieved from a user's account information page at toggl.com.
-
-*/
-package main
+package pkg
 
 import (
-	"os"
 	"github.com/jason0x43/go-toggl"
 	. "github.com/ahmetb/go-linq"
 	"fmt"
 	"time"
-	"strconv"
 	"text/template"
 	"strings"
+	"io"
 )
 
-func main() {
-	argc := len(os.Args)
-	if ! (argc == 3 || argc == 4) {
-		println("usage:", os.Args[0], "API_TOKEN WORKSPACE_ID")
-		println("usage:", os.Args[0], "API_TOKEN WORKSPACE_ID yyyy-mm-dd")
-		return
-	}
+func Process(apiToken string, workspaceId int, date time.Time, w io.Writer) (err error) {
 
-	apiToken := os.Args[1]
-	workspaceId, err := strconv.Atoi(os.Args[2])
-	if err != nil {
-		println("error:", err)
-		return
-	}
-
-	var date time.Time
-	if argc == 4 {
-		date, err = time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", os.Args[3]))
-		if err != nil {
-			println("error:", err)
-			return
-		}
-	} else {
-		date = time.Now()
-    	date = date.Truncate( time.Hour ).Add( - time.Duration(date.Hour()) * time.Hour )
-	}
-
-	println(date.Format(time.ANSIC))
-	println(date.Format(time.RFC3339))
+	w.Write([]byte(fmt.Sprintln(date.Format(time.ANSIC))))
+	w.Write([]byte(fmt.Sprintln(date.Format(time.RFC3339))))
 
 	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
 
 	
 	nextDate := date.AddDate(0, 0, 1)
 	nextDate = nextDate.Truncate( time.Hour ).Add( - time.Duration(nextDate.Hour()) * time.Hour )
-	println(nextDate.Format(time.ANSIC))
+	w.Write([]byte(fmt.Sprintln(nextDate.Format(time.ANSIC))))
 
 	const letter = `
 @@@
@@ -84,15 +49,13 @@ total {{.DurationSum}}
 
 	projects, err := session.GetProjects(workspaceId)
 	if err != nil {
-		println("error:", err)
-		return
+		return err
 	}
 	projectMap := makeProjectMap(projects)
 
 	timeEntries, err := session.GetTimeEntries(date, nextDate)
 	if err != nil {
-		println("error:", err)
-		return
+		return err
 	}
 
 	durationSum := int64(0)
@@ -106,11 +69,12 @@ total {{.DurationSum}}
 	})
 	content.DurationSum = fmtDurationHHMM(time.Duration(durationSum) * time.Second)
 
-	err = tmpl.Execute(os.Stdout, content)
+	err = tmpl.Execute(w, content)
 	if err != nil {
-		println("executing template:", err)
-		return
+		return err
 	}
+
+	return nil
 }
 
 func makeProjectMap(projects []toggl.Project) map[int]string {

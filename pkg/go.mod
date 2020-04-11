@@ -1,6 +1,6 @@
-module toggl_sample01
+module tgl_pkg
 
-go 1.13
+go 1.14
 
 require (
 	github.com/ahmetb/go-linq v3.0.0+incompatible
