@@ -29,7 +29,7 @@ func readConfig() (me *pkg.TogglClient, err error) {
     return nil, errors.New(fmt.Sprintf("TGLO_WORKSPACEID: %s", err.Error()))
   }
 
-  return &pkg.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId}, nil
+  return &pkg.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, Verbose: verbose}, nil
 }
 
 

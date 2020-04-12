@@ -15,14 +15,20 @@ import (
 type TogglClient struct {
 	ApiToken string
 	WorkSpaceId int
+	Verbose bool
 }
 
 func (me *TogglClient) Process(from time.Time, till time.Time, w io.Writer) (err error) {
 
-	w.Write([]byte(fmt.Sprintln(from.Format(time.ANSIC))))
-	w.Write([]byte(fmt.Sprintln(from.Format(time.RFC3339))))
-	w.Write([]byte(fmt.Sprintln(till.Format(time.ANSIC))))
-	w.Write([]byte(fmt.Sprintln(till.Format(time.RFC3339))))
+	if me.Verbose {
+		toggl.EnableLog()
+		w.Write([]byte(fmt.Sprintln(from.Format(time.ANSIC))))
+		w.Write([]byte(fmt.Sprintln(from.Format(time.RFC3339))))
+		w.Write([]byte(fmt.Sprintln(till.Format(time.ANSIC))))
+		w.Write([]byte(fmt.Sprintln(till.Format(time.RFC3339))))	
+	} else {
+		toggl.DisableLog()
+	}
 
 	type Content struct {
 		Date string
@@ -39,10 +45,9 @@ func (me *TogglClient) Process(from time.Time, till time.Time, w io.Writer) (err
 
 	tags := account.Data.Tags
 	tagSumMap := makeTagDurationSumMap(tags)
-	From(tags).ForEachT(func(tag toggl.Tag) {
-		w.Write([]byte(fmt.Sprintln(tag.Name)))
-	})
-
+	//From(tags).ForEachT(func(tag toggl.Tag) {
+	//	w.Write([]byte(fmt.Sprintln(tag.Name)))
+	//})
 
 	projects, err := session.GetProjects(me.WorkSpaceId)
 	if err != nil { return err }
