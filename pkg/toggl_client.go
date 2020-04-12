@@ -25,11 +25,22 @@ func ProcessDay(apiToken string, workspaceId int, dateS string, w io.Writer) (er
 	type Content struct {
 		Date string
 		DurationSum string
+		DurationTagSum []string
 		TimeEntries []string
 	}
 	content := Content{Date: date.Format("2006-01-02")}
 
 	session := toggl.OpenSession(apiToken)
+
+	account, err := session.GetAccount()
+	if err != nil { return err }
+
+	tags := account.Data.Tags
+	tagSumMap := makeTagDurationSumMap(tags)
+	From(tags).ForEachT(func(tag toggl.Tag) {
+		w.Write([]byte(fmt.Sprintln(tag.Name)))
+	})
+
 
 	projects, err := session.GetProjects(workspaceId)
 	if err != nil { return err }
@@ -44,10 +55,21 @@ func ProcessDay(apiToken string, workspaceId int, dateS string, w io.Writer) (er
 		stop := te.Stop.In(jst())
 		duration := time.Duration(te.Duration) * time.Second
 		durationSum = durationSum + te.Duration
+		From(te.Tags).ForEachT(func(tagname string) {
+			tagSumMap[tagname] = tagSumMap[tagname] + te.Duration
+		})
 		s := fmt.Sprintf("- [%s] %02d:%02d - %02d:%02d %v %v", fmtDurationHHMM(duration), start.Hour(), start.Minute(), stop.Hour(), stop.Minute(), projectMap[te.Pid], te.Description)
 		content.TimeEntries = append(content.TimeEntries, s)
 	})
 	content.DurationSum = fmtDurationHHMM(time.Duration(durationSum) * time.Second)
+	From(tags).
+		WhereT(func(tag toggl.Tag) bool {
+			return tagSumMap[tag.Name] > 0
+		}).
+		SelectT(func(tag toggl.Tag) string {
+			return fmt.Sprintf("- [%s] %6.2f%% %s", fmtDurationHHMM(time.Duration(tagSumMap[tag.Name]) * time.Second), float64(tagSumMap[tag.Name]) * float64(100) / float64(durationSum), tag.Name)	
+		}).
+		ToSlice(&content.DurationTagSum)
 
 	err = dayTemplate().Execute(w, content)
 	if err != nil { return err }
@@ -64,13 +86,22 @@ func jst() *time.Location {
 	return time.FixedZone("Asia/Tokyo", 9*60*60)
 }
 
-func makeProjectMap(projects []toggl.Project) map[int]string {
-	projectMap := map[int]string{}
-	From(projects).ToMapByT(&projectMap,
+func makeProjectMap(projects []toggl.Project) (map[int]string) {
+	r := map[int]string{}
+	From(projects).ToMapByT(&r,
         func(p toggl.Project) int { return p.ID },
         func(p toggl.Project) string { return p.Name },
 	)
-	return projectMap
+	return r
+}
+
+func makeTagDurationSumMap(tags []toggl.Tag) (map[string]int64) {
+	r := map[string]int64{}
+	From(tags).ToMapByT(&r,
+		func(p toggl.Tag) string { return p.Name },
+		func(p toggl.Tag) int64 { return int64(0)},
+	)
+	return r
 }
 
 func fmtDurationHHMM(d time.Duration) string {
@@ -87,6 +118,11 @@ func dayTemplate() *template.Template {
 # {{.Date}}の実績
 total {{.DurationSum}}
 {{range $var := .TimeEntries -}}
+  {{$var}}
+{{end -}}
+
+tag
+{{range $var := .DurationTagSum -}}
   {{$var}}
 {{end -}}
 @@@
