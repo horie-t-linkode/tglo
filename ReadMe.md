@@ -6,6 +6,19 @@
 
 ## 準備
 
+### ビルド方法
+
+(現時点では)ビルドはlinux環境で行う。
+
+```
+$ cd tglo
+$ ./build_for_linux.sh
+$ ls bin/
+linux  osx  windows
+$ ls bin/linux/
+tglo
+```
+
 ### togglのAPIトークン、WORKSPACEIDの指定
 
 本プログラム実行時に対象とするtogglアカウントのAPIトークン、WORKSPACEIDを指定する必要がある。
