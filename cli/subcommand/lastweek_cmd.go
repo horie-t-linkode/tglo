@@ -13,6 +13,7 @@ func newLastWeekCommand() *cobra.Command {
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
+	me.Flags().BoolVarP(&supressDetail, "supressDetail", "s", false, "詳細出力を抑制")
 	return me
 }
 
@@ -23,5 +24,5 @@ func lastWeekCommand(cmd *cobra.Command, args []string) (err error) {
 	from := tglCl.StartDayOfLastWeek()
 	till := tglCl.After24Hours(from, 7)
 
-	return tglCl.ProcessWeek(from, till, cmd.OutOrStdout())
+	return tglCl.ProcessWeek(from, till, cmd.OutOrStdout(), !supressDetail)
 }

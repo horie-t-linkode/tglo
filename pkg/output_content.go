@@ -34,6 +34,7 @@ type TimeEntryDetail struct {
 type ProjectSummary struct {
 	Name string
 	Duration string
+	ShowDetail bool
 	Items []*ProjectSummaryItem
 }
 
@@ -75,10 +76,11 @@ func newTimeEntryDetail(duration int64, from time.Time, till time.Time, projectN
 	return me
 }
 
-func newProjectSummary(name string, duration int64, items []*ProjectSummaryItem) (*ProjectSummary) {
+func newProjectSummary(name string, duration int64, showDetail bool, items []*ProjectSummaryItem) (*ProjectSummary) {
 	me := &ProjectSummary {
 		Name: name,
 		Duration: fmtDurationHHMM(time.Duration(duration/1000) * time.Second),
+		ShowDetail: showDetail,
 		Items: items,
 	}
 

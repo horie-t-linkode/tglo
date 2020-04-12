@@ -18,14 +18,14 @@ type TogglClient struct {
 }
 
 func (me *TogglClient) ProcessDay(from time.Time, till time.Time, w io.Writer) (err error) {
-	return me.process(from, till, w, dayTemplate())
+	return me.process(from, till, w, dayTemplate(), true)
 }
 
-func (me *TogglClient) ProcessWeek(from time.Time, till time.Time, w io.Writer) (err error) {
-	return me.process(from, till, w, weekTemplate())
+func (me *TogglClient) ProcessWeek(from time.Time, till time.Time, w io.Writer, showDetail bool) (err error) {
+	return me.process(from, till, w, weekTemplate(), showDetail)
 }
 
-func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, template *template.Template) (err error) {
+func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, template *template.Template, showDetail bool) (err error) {
 
 	if me.Verbose {
 		toggl.EnableLog()
@@ -36,8 +36,6 @@ func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, temp
 	} else {
 		toggl.DisableLog()
 	}
-
-
 
 	session := toggl.OpenSession(me.ApiToken)
 
@@ -57,19 +55,19 @@ func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, temp
 	summaryReport, err := session.GetSummaryReport(me.WorkSpaceId, from.Format(time.RFC3339), till.Format(time.RFC3339))
 	if err != nil { return err }
 
-	w.Write([]byte(fmt.Sprintf("total grand %d\n", summaryReport.TotalGrand)))
+	//w.Write([]byte(fmt.Sprintf("total grand %d\n", summaryReport.TotalGrand)))
 	
 	projectSummaries := []*ProjectSummary{}
 	for _, data := range summaryReport.Data {
 
 		projectSummaryItems := []*ProjectSummaryItem{}
 		for _, item := range data.Items {
-			w.Write([]byte(fmt.Sprintf("item %s %d\n", item.Title["time_entry"], item.Time)))
+			//w.Write([]byte(fmt.Sprintf("item %s %d\n", item.Title["time_entry"], item.Time)))
 			projectSummaryItems = append(projectSummaryItems, newProjectSummaryItem(item.Title["time_entry"], int64(item.Time)))
 		}
 
-		w.Write([]byte(fmt.Sprintf("project %s %d\n", data.Title.Project, data.Time)))
-		projectSummaries = append(projectSummaries, newProjectSummary(data.Title.Project, int64(data.Time), projectSummaryItems))
+		//w.Write([]byte(fmt.Sprintf("project %s %d\n", data.Title.Project, data.Time)))
+		projectSummaries = append(projectSummaries, newProjectSummary(data.Title.Project, int64(data.Time), showDetail, projectSummaryItems))
 	}
 
 	timeEntries, err := session.GetTimeEntries(from, till)

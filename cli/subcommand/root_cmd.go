@@ -16,17 +16,17 @@ var verbose bool
 
 func readConfig() (me *pkg.TogglClient, err error) {
   _ = godotenv.Load()
-  apiToken := os.Getenv("TGLO_APITOKEN")
+  apiToken := os.Getenv("TGLO_TOGGL_APITOKEN")
   if apiToken == "" {
-    return nil, errors.New(fmt.Sprintf("TGLO_APITOKEN is empty"))
+    return nil, errors.New(fmt.Sprintf("TGLO_TOGGL_APITOKEN is empty"))
   }
-  workSpaceIdS := os.Getenv("TGLO_WORKSPACEID")
+  workSpaceIdS := os.Getenv("TGLO_TOGGL_WORKSPACEID")
   if workSpaceIdS == "" {
-    return nil, errors.New(fmt.Sprintf("TGLO_WORKSPACEID is empty"))
+    return nil, errors.New(fmt.Sprintf("TGLO_TOGGL_WORKSPACEID is empty"))
   }
   workspaceId, err := strconv.Atoi(workSpaceIdS)
   if err != nil { 
-    return nil, errors.New(fmt.Sprintf("TGLO_WORKSPACEID: %s", err.Error()))
+    return nil, errors.New(fmt.Sprintf("TGLO_TOGGL_WORKSPACEID: %s", err.Error()))
   }
 
   return &pkg.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, Verbose: verbose}, nil

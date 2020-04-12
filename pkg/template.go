@@ -13,14 +13,14 @@ func dayTemplate() *template.Template {
 total {{.DurationTotal}}
 
 {{with .TimeEntryDetails -}}
-{{range . -}}
+{{- range . -}}
 - [{{.Duration}}] {{.From}} - {{.Till}} {{.ProjectName}} {{.Description}}
 {{end -}}
 {{end}}
 
-tag
+tags
 {{with .TagSummaries -}}
-{{range . -}}
+{{- range . -}}
 - [{{.Duration}}] {{.Ratio}} {{.Name}}
 {{end -}}
 {{end -}}
@@ -36,24 +36,31 @@ tag
 
 func weekTemplate() *template.Template {
 	const letter = `
-@@@
+
 ## Report[{{.From}} 〜 {{.Till}}]
 
 - total {{.DurationTotal}}
 
-
 {{with .ProjectSummaries -}}
-{{range . -}}
+{{- range . -}}
 ### [{{.Duration}}] {{.Name}}
+{{if eq .ShowDetail true}}
 {{with .Items -}}
-{{range . -}}
+{{- range . -}}
 - [{{.Duration}}] {{.Title}}
 {{end -}}
 {{end -}}
 {{end -}}
 {{end -}}
-@@@
+{{end}}
+
+### tags
+{{with .TagSummaries -}}
+{{range . -}}
+- [{{.Duration}}] {{.Ratio}} {{.Name}}
+{{end -}}
+{{end -}}
 `
 
-	return template.Must(template.New("letter").Parse(strings.Replace(letter, "@", "`", -1)))
+	return template.Must(template.New("letter").Parse(letter))
 }
