@@ -23,5 +23,5 @@ func yesterdayCommand(cmd *cobra.Command, args []string) (err error) {
 	from := tglCl.Yesterday()
 	till := tglCl.After24Hours(from, 1)
 
-	return tglCl.Process(from, till, cmd.OutOrStdout())
+	return tglCl.ProcessDay(from, till, cmd.OutOrStdout())
 }

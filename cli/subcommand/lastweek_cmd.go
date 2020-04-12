@@ -23,5 +23,5 @@ func lastWeekCommand(cmd *cobra.Command, args []string) (err error) {
 	from := tglCl.StartDayOfLastWeek()
 	till := tglCl.After24Hours(from, 7)
 
-	return tglCl.Process(from, till, cmd.OutOrStdout())
+	return tglCl.ProcessWeek(from, till, cmd.OutOrStdout())
 }
