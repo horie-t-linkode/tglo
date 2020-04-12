@@ -6,12 +6,18 @@ import (
 	. "github.com/ahmetb/go-linq"
 	"fmt"
 	"time"
+	"github.com/snabb/isoweek"
 	"text/template"
 	"strings"
 	"io"
 )
 
-func Process(apiToken string, workspaceId int, from time.Time, till time.Time, w io.Writer) (err error) {
+type TogglClient struct {
+	ApiToken string
+	WorkSpaceId int
+}
+
+func (me *TogglClient) Process(from time.Time, till time.Time, w io.Writer) (err error) {
 
 	w.Write([]byte(fmt.Sprintln(from.Format(time.ANSIC))))
 	w.Write([]byte(fmt.Sprintln(from.Format(time.RFC3339))))
@@ -26,7 +32,7 @@ func Process(apiToken string, workspaceId int, from time.Time, till time.Time, w
 	}
 	content := Content{Date: from.Format("2006-01-02")}
 
-	session := toggl.OpenSession(apiToken)
+	session := toggl.OpenSession(me.ApiToken)
 
 	account, err := session.GetAccount()
 	if err != nil { return err }
@@ -38,7 +44,7 @@ func Process(apiToken string, workspaceId int, from time.Time, till time.Time, w
 	})
 
 
-	projects, err := session.GetProjects(workspaceId)
+	projects, err := session.GetProjects(me.WorkSpaceId)
 	if err != nil { return err }
 	projectMap := makeProjectMap(projects)
 
@@ -73,22 +79,48 @@ func Process(apiToken string, workspaceId int, from time.Time, till time.Time, w
 	return nil
 }
 
-func Date(dateS string) (date time.Time, err error) {
+func (me *TogglClient) Date(dateS string) (date time.Time, err error) {
 	date, err = time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", dateS))
 	if err != nil { return date, err }
 
 	return date, nil
 }
 
-func Today() (date time.Time) {
+func (me *TogglClient) Today() (date time.Time) {
 	date = time.Now()
 	date = date.Truncate( time.Hour ).Add( - time.Duration(date.Hour()) * time.Hour )
 	return date
 }
 
-func NextDay(date time.Time) (time.Time) {
-	nextDay := date.AddDate(0, 0, 1)
-	return nextDay.Truncate( time.Hour ).Add( - time.Duration(nextDay.Hour()) * time.Hour )
+func (me *TogglClient) Yesterday() (time.Time) {
+	r := time.Now().AddDate(0, 0, -1)
+	return r.Truncate( time.Hour ).Add( - time.Duration(r.Hour()) * time.Hour )
+}
+
+func daysAgo(date time.Time, days int) (time.Time) {
+	r := date.AddDate(0, 0, -1 * days)
+	return r.Truncate( time.Hour ).Add( - time.Duration(r.Hour()) * time.Hour )
+}
+
+func (me *TogglClient) After24Hours(date time.Time, days time.Duration) (time.Time) {
+	return date.Add((days * 24 * 60 * 60 - 1) * time.Second)
+}
+
+func startDayOfWeek(date time.Time) (time.Time) {
+	isoYear, isoWeek := date.ISOWeek()
+
+	year, month, day := isoweek.StartDate(isoYear, isoWeek)
+	r := time.Date(year, month, day, 0, 0, 0, 0, jst())
+
+	return r
+}
+
+func (me *TogglClient) StartDayOfThisWeek() (time.Time) {
+	return startDayOfWeek(me.Today())
+}
+
+func (me *TogglClient) StartDayOfLastWeek() (time.Time) {
+	return startDayOfWeek(daysAgo(me.Today(), 7))
 }
 
 func jst() *time.Location {

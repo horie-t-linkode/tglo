@@ -8,17 +8,13 @@ import (
   "github.com/spf13/cobra"
   "tglo_cli/mylogger"
   "github.com/joho/godotenv"
+  "github.com/masaki-linkode/tglo/pkg"
 )
 
 var logger = mylogger.GetLogger()
 var verbose bool
 
-type MyToggl struct {
-  ApiToken string 
-  WorkSpaceId int
-}
-
-func readConfig() (me *MyToggl, err error) {
+func readConfig() (me *pkg.TogglClient, err error) {
   _ = godotenv.Load()
   apiToken := os.Getenv("TGLO_APITOKEN")
   if apiToken == "" {
@@ -33,7 +29,7 @@ func readConfig() (me *MyToggl, err error) {
     return nil, errors.New(fmt.Sprintf("TGLO_WORKSPACEID: %s", err.Error()))
   }
 
-  return &MyToggl{ApiToken: apiToken, WorkSpaceId: workspaceId}, nil
+  return &pkg.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId}, nil
 }
 
 
@@ -57,10 +53,11 @@ func NewRootCommand() *cobra.Command {
   })
 
   me.AddCommand(newVersionCommand())
-
   me.AddCommand(newDayCommand())
-
   me.AddCommand(newTodayCommand())
+  me.AddCommand(newYesterdayCommand())
+  me.AddCommand(newThisWeekCommand())
+  me.AddCommand(newLastWeekCommand())
   
   return me
 } 

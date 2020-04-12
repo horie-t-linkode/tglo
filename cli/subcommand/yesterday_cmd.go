@@ -4,29 +4,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newDayCommand() *cobra.Command {
+func newYesterdayCommand() *cobra.Command {
 	me := &cobra.Command{
-		Use: "day",
+		Use: "yesterday",
 		Short: "hogehoge",
 		Long:  `hogehahahahah`,
-		RunE: dayCommand,
+		RunE: yesterdayCommand,
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
-	me.Flags().StringP("date", "d", "", "yyyy-mm-dd")
-	me.MarkFlagRequired("date")
 	return me
 }
 
-func dayCommand(cmd *cobra.Command, args []string) (err error) {
-	dateS, _ := cmd.Flags().GetString("date")
-
+func yesterdayCommand(cmd *cobra.Command, args []string) (err error) {
 	tglCl, err := readConfig()
 	if err != nil { return err }
 
-	from, err := tglCl.Date(dateS)
-	if err != nil { return err }
-
+	from := tglCl.Yesterday()
 	till := tglCl.After24Hours(from, 1)
 
 	return tglCl.Process(from, till, cmd.OutOrStdout())

@@ -4,24 +4,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newTodayCommand() *cobra.Command {
+func newLastWeekCommand() *cobra.Command {
 	me := &cobra.Command{
-		Use: "today",
+		Use: "lastweek",
 		Short: "hogehoge",
 		Long:  `hogehahahahah`,
-		RunE: todayCommand,
+		RunE: lastWeekCommand,
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
 	return me
 }
 
-func todayCommand(cmd *cobra.Command, args []string) (err error) {
+func lastWeekCommand(cmd *cobra.Command, args []string) (err error) {
 	tglCl, err := readConfig()
 	if err != nil { return err }
 
-	from := tglCl.Today()
-	till := tglCl.After24Hours(from, 1)
+	from := tglCl.StartDayOfLastWeek()
+	till := tglCl.After24Hours(from, 7)
 
 	return tglCl.Process(from, till, cmd.OutOrStdout())
 }

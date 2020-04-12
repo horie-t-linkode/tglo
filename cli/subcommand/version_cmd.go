@@ -14,14 +14,14 @@ func newVersionCommand() *cobra.Command {
 		Use: "version",
 		Short: "バージョンを表示",
 		Long:  `本コマンドのバージョンを表示する。`,
-		RunE: VersionCommand,
+		RunE: versionCommand,
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
 	return me
 }
 
-func VersionCommand(cmd *cobra.Command, args []string) error {
+func versionCommand(cmd *cobra.Command, args []string) error {
 	cmd.Println(fmt.Sprintf("%s.%s %s", version, revision, buildDate))
 	return nil
 }
