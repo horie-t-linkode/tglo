@@ -5,29 +5,23 @@ import (
 	"github.com/masaki-linkode/tglo/pkg"
 )
 
-func newDayCommand() *cobra.Command {
+func newTodayCommand() *cobra.Command {
 	me := &cobra.Command{
-		Use: "day",
+		Use: "today",
 		Short: "hogehoge",
 		Long:  `hogehahahahah`,
-		RunE: DayCommand,
+		RunE: TodayCommand,
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
-	me.Flags().StringP("date", "d", "", "yyyy-mm-dd")
-	me.MarkFlagRequired("date")
 	return me
 }
 
-func DayCommand(cmd *cobra.Command, args []string) (err error) {
-	dateS, _ := cmd.Flags().GetString("date")
-
+func TodayCommand(cmd *cobra.Command, args []string) (err error) {
 	config, err := readConfig()
 	if err != nil { return err }
 
-	from, err := pkg.Date(dateS)
-	if err != nil { return err }
-
+	from := pkg.Today()
 	till := pkg.NextDay(from)
 
 	return pkg.Process(config.ApiToken, config.WorkSpaceId, from, till, cmd.OutOrStdout())

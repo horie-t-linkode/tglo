@@ -11,16 +11,12 @@ import (
 	"io"
 )
 
-func ProcessDay(apiToken string, workspaceId int, dateS string, w io.Writer) (err error) {
+func Process(apiToken string, workspaceId int, from time.Time, till time.Time, w io.Writer) (err error) {
 
-	date, err := time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", dateS))
-	if err != nil { return err }
-
-	w.Write([]byte(fmt.Sprintln(date.Format(time.ANSIC))))
-	w.Write([]byte(fmt.Sprintln(date.Format(time.RFC3339))))
-	
-	nextDay := nextDay(date)
-	w.Write([]byte(fmt.Sprintln(nextDay.Format(time.ANSIC))))
+	w.Write([]byte(fmt.Sprintln(from.Format(time.ANSIC))))
+	w.Write([]byte(fmt.Sprintln(from.Format(time.RFC3339))))
+	w.Write([]byte(fmt.Sprintln(till.Format(time.ANSIC))))
+	w.Write([]byte(fmt.Sprintln(till.Format(time.RFC3339))))
 
 	type Content struct {
 		Date string
@@ -28,7 +24,7 @@ func ProcessDay(apiToken string, workspaceId int, dateS string, w io.Writer) (er
 		DurationTagSum []string
 		TimeEntries []string
 	}
-	content := Content{Date: date.Format("2006-01-02")}
+	content := Content{Date: from.Format("2006-01-02")}
 
 	session := toggl.OpenSession(apiToken)
 
@@ -46,7 +42,7 @@ func ProcessDay(apiToken string, workspaceId int, dateS string, w io.Writer) (er
 	if err != nil { return err }
 	projectMap := makeProjectMap(projects)
 
-	timeEntries, err := session.GetTimeEntries(date, nextDay)
+	timeEntries, err := session.GetTimeEntries(from, till)
 	if err != nil { return err }
 
 	durationSum := int64(0)
@@ -77,7 +73,20 @@ func ProcessDay(apiToken string, workspaceId int, dateS string, w io.Writer) (er
 	return nil
 }
 
-func nextDay(date time.Time) (time.Time) {
+func Date(dateS string) (date time.Time, err error) {
+	date, err = time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", dateS))
+	if err != nil { return date, err }
+
+	return date, nil
+}
+
+func Today() (date time.Time) {
+	date = time.Now()
+	date = date.Truncate( time.Hour ).Add( - time.Duration(date.Hour()) * time.Hour )
+	return date
+}
+
+func NextDay(date time.Time) (time.Time) {
 	nextDay := date.AddDate(0, 0, 1)
 	return nextDay.Truncate( time.Hour ).Add( - time.Duration(nextDay.Hour()) * time.Hour )
 }

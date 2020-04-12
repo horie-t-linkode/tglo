@@ -50,17 +50,17 @@ func NewRootCommand() *cobra.Command {
 
   me.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "開発者用デバッグ出力")
 
-  cobra.OnInitialize(func() {  
+  cobra.OnInitialize(func() {
     if verbose {
       mylogger.SetLevelDebug()
     }
   })
 
-  versionCmd := newVersionCommand()
-  me.AddCommand(versionCmd)
+  me.AddCommand(newVersionCommand())
 
-  dayCmd := newDayCommand()
-  me.AddCommand(dayCmd)
+  me.AddCommand(newDayCommand())
+
+  me.AddCommand(newTodayCommand())
   
   return me
 } 
