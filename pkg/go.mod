@@ -1,4 +1,4 @@
-module tgl_pkg
+module tglo_pkg
 
 go 1.14
 

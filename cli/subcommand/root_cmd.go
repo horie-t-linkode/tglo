@@ -6,7 +6,7 @@ import (
   "os"
   "strconv"
   "github.com/spf13/cobra"
-  "tgl_cli/mylogger"
+  "tglo_cli/mylogger"
   "github.com/joho/godotenv"
 )
 
@@ -20,17 +20,17 @@ type MyToggl struct {
 
 func readConfig() (me *MyToggl, err error) {
   _ = godotenv.Load()
-  apiToken := os.Getenv("TGL_APITOKEN")
+  apiToken := os.Getenv("TGLO_APITOKEN")
   if apiToken == "" {
-    return nil, errors.New(fmt.Sprintf("TGL_APITOKEN is empty"))
+    return nil, errors.New(fmt.Sprintf("TGLO_APITOKEN is empty"))
   }
-  workSpaceIdS := os.Getenv("TGL_WORKSPACEID")
+  workSpaceIdS := os.Getenv("TGLO_WORKSPACEID")
   if workSpaceIdS == "" {
-    return nil, errors.New(fmt.Sprintf("TGL_WORKSPACEID is empty"))
+    return nil, errors.New(fmt.Sprintf("TGLO_WORKSPACEID is empty"))
   }
   workspaceId, err := strconv.Atoi(workSpaceIdS)
   if err != nil { 
-    return nil, errors.New(fmt.Sprintf("TGL_WORKSPACEID: %s", err.Error()))
+    return nil, errors.New(fmt.Sprintf("TGLO_WORKSPACEID: %s", err.Error()))
   }
 
   return &MyToggl{ApiToken: apiToken, WorkSpaceId: workspaceId}, nil
@@ -39,7 +39,7 @@ func readConfig() (me *MyToggl, err error) {
 
 func NewRootCommand() *cobra.Command {
   me := &cobra.Command{
-    Use: "tgl_cli",
+    Use: "tglo_cli",
     Long:  `hogehoge`,
     RunE: func(cmd *cobra.Command, args []string) error {
       return cmd.Help()

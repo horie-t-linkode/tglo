@@ -2,7 +2,7 @@ package subcommand
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/masaki-linkode/tgl/pkg"
+	"github.com/masaki-linkode/tglo/pkg"
 )
 
 func newDayCommand() *cobra.Command {
