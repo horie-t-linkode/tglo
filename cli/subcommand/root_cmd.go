@@ -8,13 +8,13 @@ import (
   "github.com/spf13/cobra"
   "tglo_cli/mylogger"
   "github.com/joho/godotenv"
-  "github.com/masaki-linkode/tglo/pkg"
+  "github.com/masaki-linkode/tglo/pkg/tglo_core"
 )
 
 var logger = mylogger.GetLogger()
 var verbose bool
 
-func readConfig() (me *pkg.TogglClient, err error) {
+func readConfig() (me *tglo_core.TogglClient, err error) {
   _ = godotenv.Load()
   apiToken := os.Getenv("TGLO_TOGGL_APITOKEN")
   if apiToken == "" {
@@ -29,7 +29,7 @@ func readConfig() (me *pkg.TogglClient, err error) {
     return nil, errors.New(fmt.Sprintf("TGLO_TOGGL_WORKSPACEID: %s", err.Error()))
   }
 
-  return &pkg.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, Verbose: verbose}, nil
+  return &tglo_core.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, Verbose: verbose}, nil
 }
 
 

@@ -1,4 +1,4 @@
-package pkg
+package tglo_core
 
 import (
 	"text/template"
