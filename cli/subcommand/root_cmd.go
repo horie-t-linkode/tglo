@@ -35,8 +35,8 @@ func readConfig() (me *pkg.TogglClient, err error) {
 
 func NewRootCommand() *cobra.Command {
   me := &cobra.Command{
-    Use: "tglo_cli",
-    Long:  `hogehoge`,
+    Use: "tglo",
+    Long:  `togglエントリ/サマリを出力する`,
     RunE: func(cmd *cobra.Command, args []string) error {
       return cmd.Help()
     },

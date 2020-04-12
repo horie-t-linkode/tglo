@@ -7,8 +7,8 @@ import (
 func newTodayCommand() *cobra.Command {
 	me := &cobra.Command{
 		Use: "today",
-		Short: "hogehoge",
-		Long:  `hogehahahahah`,
+		Short: "本日のtogglエントリを出力する",
+		Long:  `本日のtogglエントリを出力する`,
 		RunE: todayCommand,
 		SilenceUsage: true,
 		SilenceErrors: true,

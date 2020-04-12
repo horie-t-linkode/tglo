@@ -7,13 +7,13 @@ import (
 func newDayCommand() *cobra.Command {
 	me := &cobra.Command{
 		Use: "day",
-		Short: "hogehoge",
-		Long:  `hogehahahahah`,
+		Short: "指定日のtogglエントリを出力する",
+		Long:  `指定日のtogglエントリを出力する`,
 		RunE: dayCommand,
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
-	me.Flags().StringP("date", "d", "", "yyyy-mm-dd")
+	me.Flags().StringP("date", "d", "", "指定日。yyyy-mm-dd形式。")
 	me.MarkFlagRequired("date")
 	return me
 }

@@ -7,8 +7,8 @@ import (
 func newLastWeekCommand() *cobra.Command {
 	me := &cobra.Command{
 		Use: "lastweek",
-		Short: "hogehoge",
-		Long:  `hogehahahahah`,
+		Short: "先週分のtogglエントリのサマリを出力する",
+		Long:  `先週分のtogglエントリのサマリを出力する`,
 		RunE: lastWeekCommand,
 		SilenceUsage: true,
 		SilenceErrors: true,

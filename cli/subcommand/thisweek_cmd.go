@@ -9,8 +9,8 @@ var supressDetail bool
 func newThisWeekCommand() *cobra.Command {
 	me := &cobra.Command{
 		Use: "thisweek",
-		Short: "hogehoge",
-		Long:  `hogehahahahah`,
+		Short: "今週分のtogglエントリのサマリを出力する",
+		Long:  `今週分のtogglエントリのサマリを出力する`,
 		RunE: thisWeekCommand,
 		SilenceUsage: true,
 		SilenceErrors: true,

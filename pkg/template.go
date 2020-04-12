@@ -36,7 +36,6 @@ tags
 
 func weekTemplate() *template.Template {
 	const letter = `
-
 ## Report[{{.From}} 〜 {{.Till}}]
 
 - total {{.DurationTotal}}
