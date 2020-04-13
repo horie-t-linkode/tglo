@@ -62,7 +62,14 @@ func NewRootCommand() *cobra.Command {
   return me
 } 
 
-func Execute() {
+var myversion string
+var myrevision string
+var mybuildDate string
+
+func Execute(version string, revision string, buildDate string) {
+  myversion = version
+  myrevision = revision
+  mybuildDate = buildDate
   rootCmd := NewRootCommand()
   rootCmd.SetOutput(os.Stdout)
   Exit(rootCmd.Execute())

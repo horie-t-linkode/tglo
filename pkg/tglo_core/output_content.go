@@ -17,7 +17,6 @@ type OutputContent struct {
 	From string
 	Till string
 	DurationTotal string
-	//DurationTagSum []string
 	TimeEntryDetails []*TimeEntryDetail
 	ProjectSummaries []*ProjectSummary
 	TagSummaries []*TagSummary
@@ -63,7 +62,6 @@ func newOutputContent(from time.Time, till time.Time, durationTotal int64, timeE
 }
 
 func newTimeEntryDetail(duration int64, from time.Time, till time.Time, projectName string, description string) (*TimeEntryDetail) {
-	//s := fmt.Sprintf("- [%s] %02d:%02d - %02d:%02d %v %v", fmtDurationHHMM(duration), start.Hour(), start.Minute(), stop.Hour(), stop.Minute(), projectMap[te.Pid], te.Description)
 
 	me := &TimeEntryDetail {
 		Duration: fmtDurationHHMM(time.Duration(duration) * time.Second),

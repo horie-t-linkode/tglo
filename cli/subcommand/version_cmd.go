@@ -5,9 +5,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "unknown"
-var revision = "unknown"
-var buildDate = "unknown"
+//var version = "unknown"
+//var revision = "unknown"
+//var buildDate = "unknown"
 
 func newVersionCommand() *cobra.Command {
 	me := &cobra.Command{
@@ -22,6 +22,6 @@ func newVersionCommand() *cobra.Command {
 }
 
 func versionCommand(cmd *cobra.Command, args []string) error {
-	cmd.Println(fmt.Sprintf("%s.%s %s", version, revision, buildDate))
+	cmd.Println(fmt.Sprintf("%s.%s %s", myversion, myrevision, mybuildDate))
 	return nil
 }

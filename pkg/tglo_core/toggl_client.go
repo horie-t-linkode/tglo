@@ -73,21 +73,16 @@ func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, temp
 	timeEntries, err := session.GetTimeEntries(from, till)
 	if err != nil { return err }
 
-	//durationSum := int64(0)
 	timeEntryDetails := []*TimeEntryDetail{}
 	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
 		start := te.Start.In(jst())
 		stop := te.Stop.In(jst())
-		//duration := time.Duration(te.Duration) * time.Second
-		//durationSum = durationSum + te.Duration
 		From(te.Tags).ForEachT(func(tagname string) {
 			tagSumMap[tagname] = tagSumMap[tagname] + te.Duration
 		})
-		//s := fmt.Sprintf("- [%s] %02d:%02d - %02d:%02d %v %v", fmtDurationHHMM(duration), start.Hour(), start.Minute(), stop.Hour(), stop.Minute(), projectMap[te.Pid], te.Description)
 		timeEntryDetails = append(timeEntryDetails, newTimeEntryDetail(int64(te.Duration), start, stop, projectMap[te.Pid], te.Description))
 	})
 
-	//content.DurationSum = fmtDurationHHMM(time.Duration(durationSum) * time.Second)
 	tagSummaries := []*TagSummary{}
 	From(tags).
 		WhereT(func(tag toggl.Tag) bool {
@@ -95,7 +90,6 @@ func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, temp
 		}).
 		SelectT(func(tag toggl.Tag) *TagSummary {
 			return newTagSummary(tag.Name, tagSumMap[tag.Name], int64(summaryReport.TotalGrand))
-			//return fmt.Sprintf("- [%s] %6.2f%% %s", fmtDurationHHMM(time.Duration(tagSumMap[tag.Name]) * time.Second), float64(tagSumMap[tag.Name]) * float64(100) / float64(durationSum), tag.Name)	
 		}).
 		ToSlice(&tagSummaries)
 

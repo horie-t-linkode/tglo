@@ -2,9 +2,9 @@ cd cli
 
 BUILDDATE=$(date '+%Y/%m/%d %H:%M:%S %Z')
 
-LDFLAGS1="github.com/masaki-linkode/tglo/cli/subcommand.version=$(git describe --tags --abbrev=0)"
-LDFLAGS2="github.com/masaki-linkode/tglo/cli/subcommand.revision=$(git rev-parse --short HEAD)"
-LDFLAGS3="github.com/masaki-linkode/tglo/cli/subcommand.buildDate=${BUILDDATE}"
+LDFLAGS1="main.version=$(git describe --tags --abbrev=0)"
+LDFLAGS2="main.revision=$(git rev-parse --short HEAD)"
+LDFLAGS3="main.buildDate=${BUILDDATE}"
 echo $LDFLAGS1
 echo $LDFLAGS2
 echo $LDFLAGS3
