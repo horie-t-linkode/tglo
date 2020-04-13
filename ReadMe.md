@@ -21,15 +21,8 @@ tglo
 
 ### togglのAPIトークン、WORKSPACEIDの指定
 
-本プログラム実行時に対象とするtogglアカウントのAPIトークン、WORKSPACEIDを指定する必要がある。
-
-#### 環境変数
-
-環境変数で指定する場合の例は以下の通り。
-
-```
-> TGLO_TOGGL_APITOKEN=<あなたのtogglのAPIトークン文字列> TGLO_TOGGL_WORKSPACEID=<あなたのtogglのWORKSPACEID番号> ./tglo yesterday
-```
+本プログラム実行時に対象とするtogglアカウントのAPIトークン、WORKSPACEIDを指定する必要がある。  
+指定する方法は以下の2通りある。
 
 #### .envファイル
 
@@ -39,6 +32,13 @@ tglo
 TGLO_TOGGL_APITOKEN=<あなたのtogglのAPIトークン文字列>
 TGLO_TOGGL_WORKSPACEID=<あなたのtogglのWORKSPACEID番号>
 ```
+
+#### 環境変数
+
+環境変数で以下の値を設定する。
+
+- TGLO_TOGGL_APITOKEN : <あなたのtogglのAPIトークン文字列>
+- TGLO_TOGGL_WORKSPACEID : <あなたのtogglのWORKSPACEID番号>
 
 ## 実行
 
