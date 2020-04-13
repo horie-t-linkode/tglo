@@ -17,7 +17,7 @@ func newYesterdayCommand() *cobra.Command {
 }
 
 func yesterdayCommand(cmd *cobra.Command, args []string) (err error) {
-	tglCl, err := readConfig()
+	tglCl, err := readTogglClientConfig()
 	if err != nil { return err }
 
 	from := tglCl.Yesterday()

@@ -2,7 +2,11 @@ package subcommand
 
 import (
 	"github.com/spf13/cobra"
+	"bytes"
+	"io"
 )
+
+var postDocbase bool
 
 func newLastWeekCommand() *cobra.Command {
 	me := &cobra.Command{
@@ -14,15 +18,31 @@ func newLastWeekCommand() *cobra.Command {
 		SilenceErrors: true,
 	}
 	me.Flags().BoolVarP(&supressDetail, "supressDetail", "s", false, "詳細出力を抑制")
+	me.Flags().BoolVarP(&postDocbase, "postDocbase", "", false, "docbaseにポスト")
 	return me
 }
 
 func lastWeekCommand(cmd *cobra.Command, args []string) (err error) {
-	tglCl, err := readConfig()
+	tglCl, err := readTogglClientConfig()
 	if err != nil { return err }
 
 	from := tglCl.StartDayOfLastWeek()
 	till := tglCl.After24Hours(from, 7)
 
-	return tglCl.ProcessWeek(from, till, cmd.OutOrStdout(), !supressDetail)
+
+	var buffer bytes.Buffer
+	err = tglCl.ProcessWeek(from, till, &buffer, !supressDetail)
+	if err != nil { return err }
+	//_, err = buffer.WriteTo(cmd.OutOrStdout())
+
+	writers := []io.Writer{cmd.OutOrStdout()}
+	if postDocbase {
+		docbaseCl, err := readDocbaseClientConfig()
+		if err != nil { return err }
+
+		writers = append(writers, docbaseCl)
+	}
+	mw := io.MultiWriter(writers...)
+	_, err = buffer.WriteTo(mw)
+	return err
 }

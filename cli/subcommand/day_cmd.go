@@ -21,7 +21,7 @@ func newDayCommand() *cobra.Command {
 func dayCommand(cmd *cobra.Command, args []string) (err error) {
 	dateS, _ := cmd.Flags().GetString("date")
 
-	tglCl, err := readConfig()
+	tglCl, err := readTogglClientConfig()
 	if err != nil { return err }
 
 	from, err := tglCl.Date(dateS)
