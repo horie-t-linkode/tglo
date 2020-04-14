@@ -5,6 +5,7 @@ import (
   "fmt"
   "os"
   "strconv"
+  "strings"
   "github.com/joho/godotenv"
   "github.com/masaki-linkode/tglo/pkg/tglo_core"
 )
@@ -41,6 +42,34 @@ func readDocbaseClientConfig() (me *tglo_core.DocbaseClient, err error) {
   if accessToken == "" {
     return nil, errors.New(fmt.Sprintf("TGLO_DOCBASE_ACCESSTOKEN is empty"))
   }
+
+  postingTitle := os.Getenv("TGLO_DOCBASE_POSTING_TITLE")
+  if postingTitle == "" {
+    return nil, errors.New(fmt.Sprintf("TGLO_DOCBASE_POST_TAGS is empty"))
+  }
+
+  postingTags := os.Getenv("TGLO_DOCBASE_POSTING_TAGS")
+  //if postingTags == "" {
+  //  return nil, errors.New(fmt.Sprintf("TGLO_DOCBASE_POST_TAGS is empty"))
+  //}
+
+  postingGroups := os.Getenv("TGLO_DOCBASE_POSTING_GROUPS")
+  if postingGroups == "" {
+    return nil, errors.New(fmt.Sprintf("TGLO_DOCBASE_POST_GROUPS is empty"))
+  }
   
-  return &tglo_core.DocbaseClient{AccessToken: accessToken, Domain: domain}, nil
+  var postingGroupIds []int
+  for _, s := range strings.Split(postingGroups, ","){
+    var n, err = strconv.Atoi(s)
+    if err != nil { return nil, errors.New(fmt.Sprintf("TGLO_DOCBASE_POST_GROUPS not convert")) }
+    postingGroupIds = append(postingGroupIds, n)
+  }
+
+  return &tglo_core.DocbaseClient{
+    AccessToken: accessToken, 
+    Domain: domain, 
+    PostingTitle: postingTitle,
+    PostingTags: strings.Split(postingTags, ","),
+    PostingGroupIds: postingGroupIds,
+    }, nil
 }

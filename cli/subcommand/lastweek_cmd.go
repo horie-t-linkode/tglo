@@ -33,7 +33,6 @@ func lastWeekCommand(cmd *cobra.Command, args []string) (err error) {
 	var buffer bytes.Buffer
 	err = tglCl.ProcessWeek(from, till, &buffer, !supressDetail)
 	if err != nil { return err }
-	//_, err = buffer.WriteTo(cmd.OutOrStdout())
 
 	writers := []io.Writer{cmd.OutOrStdout()}
 	if postDocbase {
