@@ -33,7 +33,7 @@ func After24Hours(date time.Time, days time.Duration) (time.Time) {
 	return date.Add((days * 24 * 60 * 60 - 1) * time.Second)
 }
 
-func startDayOfWeek(date time.Time) (time.Time) {
+func StartDayOfWeek(date time.Time) (time.Time) {
 	isoYear, isoWeek := date.ISOWeek()
 
 	year, month, day := isoweek.StartDate(isoYear, isoWeek)
@@ -43,11 +43,11 @@ func startDayOfWeek(date time.Time) (time.Time) {
 }
 
 func StartDayOfThisWeek() (time.Time) {
-	return startDayOfWeek(Today())
+	return StartDayOfWeek(Today())
 }
 
 func StartDayOfLastWeek() (time.Time) {
-	return startDayOfWeek(daysAgo(Today(), 7))
+	return StartDayOfWeek(daysAgo(Today(), 7))
 }
 
 func Jst() *time.Location {

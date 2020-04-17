@@ -38,6 +38,7 @@ func NewRootCommand() *cobra.Command {
   me.AddCommand(newDayCommand())
   me.AddCommand(newTodayCommand())
   me.AddCommand(newYesterdayCommand())
+  me.AddCommand(newWeekCommand())
   me.AddCommand(newThisWeekCommand())
   me.AddCommand(newLastWeekCommand())
 
