@@ -2,7 +2,8 @@ package subcommand
 
 import (
 	//"github.com/spf13/cobra"
-	"github.com/masaki-linkode/tglo/pkg/tglo_core"
+	//"github.com/masaki-linkode/tglo/pkg/tglo_core"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core/template"
 	"time"
 	"io"
 	"bytes"
@@ -21,7 +22,7 @@ func processWeek(from time.Time, till time.Time, postDocbase bool, showDetail bo
 	if err != nil { return err }
 
 	var buffer bytes.Buffer
-	err = tglo_core.TemplateExecute(tglo_core.WeekTemplate(), &buffer, content)
+	err = template.TemplateExecute(template.WeekTemplate(), &buffer, content)
 	if err != nil { return err }
 
 

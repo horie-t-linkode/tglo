@@ -1,4 +1,4 @@
-package tglo_core
+package template
 
 import (
 	"fmt"
@@ -48,7 +48,7 @@ type TagSummary struct {
 	Ratio string
 }
 
-func newOutputContent(from time.Time, till time.Time, durationTotal int64, timeEntryDetails []*TimeEntryDetail, projectSummaries []*ProjectSummary, tagSummaries []*TagSummary) (*OutputContent) {
+func NewOutputContent(from time.Time, till time.Time, durationTotal int64, timeEntryDetails []*TimeEntryDetail, projectSummaries []*ProjectSummary, tagSummaries []*TagSummary) (*OutputContent) {
 	me := &OutputContent{
 		From: from.Format("2006-01-02"),
 		Till: till.Format("2006-01-02"),
@@ -61,7 +61,7 @@ func newOutputContent(from time.Time, till time.Time, durationTotal int64, timeE
 	return me
 }
 
-func newTimeEntryDetail(duration int64, from time.Time, till time.Time, projectName string, description string) (*TimeEntryDetail) {
+func NewTimeEntryDetail(duration int64, from time.Time, till time.Time, projectName string, description string) (*TimeEntryDetail) {
 
 	me := &TimeEntryDetail {
 		Duration: fmtDurationHHMM(time.Duration(duration) * time.Second),
@@ -74,7 +74,7 @@ func newTimeEntryDetail(duration int64, from time.Time, till time.Time, projectN
 	return me
 }
 
-func newProjectSummary(name string, duration int64, showDetail bool, items []*ProjectSummaryItem) (*ProjectSummary) {
+func NewProjectSummary(name string, duration int64, showDetail bool, items []*ProjectSummaryItem) (*ProjectSummary) {
 	me := &ProjectSummary {
 		Name: name,
 		Duration: fmtDurationHHMM(time.Duration(duration/1000) * time.Second),
@@ -85,7 +85,7 @@ func newProjectSummary(name string, duration int64, showDetail bool, items []*Pr
 	return me
 }
 
-func newProjectSummaryItem(title string, duration int64) (*ProjectSummaryItem) {
+func NewProjectSummaryItem(title string, duration int64) (*ProjectSummaryItem) {
 	me := &ProjectSummaryItem {
 		Title: title,
 		Duration: fmtDurationHHMM(time.Duration(duration/1000) * time.Second),
@@ -94,7 +94,7 @@ func newProjectSummaryItem(title string, duration int64) (*ProjectSummaryItem) {
 	return me
 }
 
-func newTagSummary(name string, duration int64, durationTotal int64) (*TagSummary) {
+func NewTagSummary(name string, duration int64, durationTotal int64) (*TagSummary) {
 	me := &TagSummary {
 		//fmt.Sprintf("- [%s] %6.2f%%", fmtDurationHHMM(time.Duration(name) * time.Second), float64(duration) * float64(100) / float64(durationTotal), name)	
 		Name: name,

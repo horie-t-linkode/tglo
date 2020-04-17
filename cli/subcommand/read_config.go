@@ -7,10 +7,11 @@ import (
   "strconv"
   "strings"
   "github.com/joho/godotenv"
-  "github.com/masaki-linkode/tglo/pkg/tglo_core"
+  "github.com/masaki-linkode/tglo/pkg/tglo_core/toggl_client"
+  "github.com/masaki-linkode/tglo/pkg/tglo_core/docbase_client"
 )
 
-func readTogglClientConfig() (me *tglo_core.TogglClient, err error) {
+func readTogglClientConfig() (me *toggl_client.TogglClient, err error) {
   _ = godotenv.Load()
   
   apiToken := os.Getenv("TGLO_TOGGL_APITOKEN")
@@ -27,10 +28,10 @@ func readTogglClientConfig() (me *tglo_core.TogglClient, err error) {
     return nil, errors.New(fmt.Sprintf("TGLO_TOGGL_WORKSPACEID: %s", err.Error()))
   }
 
-  return &tglo_core.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, VerboseOut: verboseOut_}, nil
+  return &toggl_client.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, VerboseOut: verboseOut_}, nil
 }
 
-func readDocbaseClientConfig() (me *tglo_core.DocbaseClient, err error) {
+func readDocbaseClientConfig() (me *docbase_client.DocbaseClient, err error) {
   _ = godotenv.Load()
 
   domain := os.Getenv("TGLO_DOCBASE_DOMAIN")
@@ -65,7 +66,7 @@ func readDocbaseClientConfig() (me *tglo_core.DocbaseClient, err error) {
     postingGroupIds = append(postingGroupIds, n)
   }
 
-  return &tglo_core.DocbaseClient{
+  return &docbase_client.DocbaseClient{
     AccessToken: accessToken, 
     Domain: domain, 
     PostingTitle: postingTitle,

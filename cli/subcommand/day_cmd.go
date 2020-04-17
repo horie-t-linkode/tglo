@@ -2,7 +2,8 @@ package subcommand
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/masaki-linkode/tglo/pkg/tglo_core"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core/template"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core/time_util"
 	"time"
 )
 
@@ -23,10 +24,10 @@ func newDayCommand() *cobra.Command {
 func dayCommand(cmd *cobra.Command, args []string) (err error) {
 	dateS, _ := cmd.Flags().GetString("date")
 
-	from, err := tglo_core.Date(dateS)
+	from, err := time_util.Date(dateS)
 	if err != nil { return err }
 
-	till := tglo_core.After24Hours(from, 1)
+	till := time_util.After24Hours(from, 1)
 
 	return processDay(from, till)
 }
@@ -38,5 +39,5 @@ func processDay(from time.Time, till time.Time) (err error) {
 	content, err := tglCl.Process(from, till, true)
 	if err != nil { return err }
 
-	return tglo_core.TemplateExecute(tglo_core.DayTemplate(), commandOut_, content)
+	return template.TemplateExecute(template.DayTemplate(), commandOut_, content)
 }

@@ -2,7 +2,7 @@ package subcommand
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/masaki-linkode/tglo/pkg/tglo_core"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core/time_util"
 )
 
 func newLastWeekCommand() *cobra.Command {
@@ -21,8 +21,8 @@ func newLastWeekCommand() *cobra.Command {
 
 func lastWeekCommand(cmd *cobra.Command, args []string) (err error) {
 
-	from := tglo_core.StartDayOfLastWeek()
-	till := tglo_core.After24Hours(from, 7)
+	from := time_util.StartDayOfLastWeek()
+	till := time_util.After24Hours(from, 7)
 
 	return processWeek(from, till, postDocbase_, !supressDetail_)
 }

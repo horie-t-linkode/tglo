@@ -2,7 +2,7 @@ package subcommand
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/masaki-linkode/tglo/pkg/tglo_core"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core/time_util"
 )
 
 func newYesterdayCommand() *cobra.Command {
@@ -19,8 +19,8 @@ func newYesterdayCommand() *cobra.Command {
 
 func yesterdayCommand(cmd *cobra.Command, args []string) (err error) {
 
-	from := tglo_core.Yesterday()
-	till := tglo_core.After24Hours(from, 1)
+	from := time_util.Yesterday()
+	till := time_util.After24Hours(from, 1)
 
 	return processDay(from, till)
 }

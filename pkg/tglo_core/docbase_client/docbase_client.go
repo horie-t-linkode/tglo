@@ -1,4 +1,4 @@
-package tglo_core
+package docbase_client
 
 import (
 	"fmt"

@@ -1,13 +1,14 @@
 
-package tglo_core
+package toggl_client
 
 import (
 	"github.com/jason0x43/go-toggl"
 	. "github.com/ahmetb/go-linq"
 	"fmt"
 	"time"
-	"github.com/snabb/isoweek"
 	"io"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core/template"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core/time_util"
 )
 
 type TogglClient struct {
@@ -16,7 +17,7 @@ type TogglClient struct {
 	VerboseOut io.Writer
 }
 
-func (me *TogglClient) Process(from time.Time, till time.Time, showDetail bool) (content *OutputContent, err error) {
+func (me *TogglClient) Process(from time.Time, till time.Time, showDetail bool) (content *template.OutputContent, err error) {
 
 	if me.VerboseOut != nil {
 		toggl.EnableLog()
@@ -48,93 +49,45 @@ func (me *TogglClient) Process(from time.Time, till time.Time, showDetail bool) 
 
 	//verboseOut.Write([]byte(fmt.Sprintf("total grand %d\n", summaryReport.TotalGrand)))
 	
-	projectSummaries := []*ProjectSummary{}
+	projectSummaries := []*template.ProjectSummary{}
 	for _, data := range summaryReport.Data {
 
-		projectSummaryItems := []*ProjectSummaryItem{}
+		projectSummaryItems := []*template.ProjectSummaryItem{}
 		for _, item := range data.Items {
 			//verboseOut.Write([]byte(fmt.Sprintf("item %s %d\n", item.Title["time_entry"], item.Time)))
-			projectSummaryItems = append(projectSummaryItems, newProjectSummaryItem(item.Title["time_entry"], int64(item.Time)))
+			projectSummaryItems = append(projectSummaryItems, template.NewProjectSummaryItem(item.Title["time_entry"], int64(item.Time)))
 		}
 
 		//verboseOut.Write([]byte(fmt.Sprintf("project %s %d\n", data.Title.Project, data.Time)))
-		projectSummaries = append(projectSummaries, newProjectSummary(data.Title.Project, int64(data.Time), showDetail, projectSummaryItems))
+		projectSummaries = append(projectSummaries, template.NewProjectSummary(data.Title.Project, int64(data.Time), showDetail, projectSummaryItems))
 	}
 
 	timeEntries, err := session.GetTimeEntries(from, till)
 	if err != nil { return nil, err }
 
-	timeEntryDetails := []*TimeEntryDetail{}
+	timeEntryDetails := []*template.TimeEntryDetail{}
 	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
-		start := te.Start.In(jst())
-		stop := te.Stop.In(jst())
+		start := te.Start.In(time_util.Jst())
+		stop := te.Stop.In(time_util.Jst())
 		From(te.Tags).ForEachT(func(tagname string) {
 			tagSumMap[tagname] = tagSumMap[tagname] + te.Duration
 		})
-		timeEntryDetails = append(timeEntryDetails, newTimeEntryDetail(int64(te.Duration), start, stop, projectMap[te.Pid], te.Description))
+		timeEntryDetails = append(timeEntryDetails, template.NewTimeEntryDetail(int64(te.Duration), start, stop, projectMap[te.Pid], te.Description))
 	})
 
-	tagSummaries := []*TagSummary{}
+	tagSummaries := []*template.TagSummary{}
 	From(tags).
 		WhereT(func(tag toggl.Tag) bool {
 			return tagSumMap[tag.Name] > 0
 		}).
-		SelectT(func(tag toggl.Tag) *TagSummary {
-			return newTagSummary(tag.Name, tagSumMap[tag.Name], int64(summaryReport.TotalGrand))
+		SelectT(func(tag toggl.Tag) *template.TagSummary {
+			return template.NewTagSummary(tag.Name, tagSumMap[tag.Name], int64(summaryReport.TotalGrand))
 		}).
 		ToSlice(&tagSummaries)
 
-	content = newOutputContent(from, till, int64(summaryReport.TotalGrand), timeEntryDetails, projectSummaries, tagSummaries)
+	content = template.NewOutputContent(from, till, int64(summaryReport.TotalGrand), timeEntryDetails, projectSummaries, tagSummaries)
 
 	return content, nil
-}
-
-func Date(dateS string) (date time.Time, err error) {
-	date, err = time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", dateS))
-	if err != nil { return date, err }
-
-	return date, nil
-}
-
-func Today() (date time.Time) {
-	date = time.Now()
-	date = date.Truncate( time.Hour ).Add( - time.Duration(date.Hour()) * time.Hour )
-	return date
-}
-
-func Yesterday() (time.Time) {
-	r := time.Now().AddDate(0, 0, -1)
-	return r.Truncate( time.Hour ).Add( - time.Duration(r.Hour()) * time.Hour )
-}
-
-func daysAgo(date time.Time, days int) (time.Time) {
-	r := date.AddDate(0, 0, -1 * days)
-	return r.Truncate( time.Hour ).Add( - time.Duration(r.Hour()) * time.Hour )
-}
-
-func After24Hours(date time.Time, days time.Duration) (time.Time) {
-	return date.Add((days * 24 * 60 * 60 - 1) * time.Second)
-}
-
-func startDayOfWeek(date time.Time) (time.Time) {
-	isoYear, isoWeek := date.ISOWeek()
-
-	year, month, day := isoweek.StartDate(isoYear, isoWeek)
-	r := time.Date(year, month, day, 0, 0, 0, 0, jst())
-
-	return r
-}
-
-func StartDayOfThisWeek() (time.Time) {
-	return startDayOfWeek(Today())
-}
-
-func StartDayOfLastWeek() (time.Time) {
-	return startDayOfWeek(daysAgo(Today(), 7))
-}
-
-func jst() *time.Location {
-	return time.FixedZone("Asia/Tokyo", 9*60*60)
 }
 
 func makeProjectMap(projects []toggl.Project) (map[int]string) {
