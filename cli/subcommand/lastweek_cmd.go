@@ -2,11 +2,8 @@ package subcommand
 
 import (
 	"github.com/spf13/cobra"
-	"bytes"
-	"io"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core"
 )
-
-var postDocbase bool
 
 func newLastWeekCommand() *cobra.Command {
 	me := &cobra.Command{
@@ -17,31 +14,15 @@ func newLastWeekCommand() *cobra.Command {
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
-	me.Flags().BoolVarP(&supressDetail, "supressDetail", "s", false, "詳細出力を抑制")
-	me.Flags().BoolVarP(&postDocbase, "postDocbase", "", false, "docbaseにポスト")
+	me.Flags().BoolVarP(&supressDetail_, "supressDetail", "s", false, "詳細出力を抑制")
+	me.Flags().BoolVarP(&postDocbase_, "postDocbase", "", false, "docbaseにポスト")
 	return me
 }
 
 func lastWeekCommand(cmd *cobra.Command, args []string) (err error) {
-	tglCl, err := readTogglClientConfig()
-	if err != nil { return err }
 
-	from := tglCl.StartDayOfLastWeek()
-	till := tglCl.After24Hours(from, 7)
+	from := tglo_core.StartDayOfLastWeek()
+	till := tglo_core.After24Hours(from, 7)
 
-
-	var buffer bytes.Buffer
-	err = tglCl.ProcessWeek(from, till, &buffer, !supressDetail)
-	if err != nil { return err }
-
-	writers := []io.Writer{cmd.OutOrStdout()}
-	if postDocbase {
-		docbaseCl, err := readDocbaseClientConfig()
-		if err != nil { return err }
-
-		writers = append(writers, docbaseCl)
-	}
-	mw := io.MultiWriter(writers...)
-	_, err = buffer.WriteTo(mw)
-	return err
+	return processWeek(from, till, postDocbase_, !supressDetail_)
 }

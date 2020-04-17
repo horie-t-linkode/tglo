@@ -2,9 +2,10 @@ package subcommand
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/masaki-linkode/tglo/pkg/tglo_core"
 )
 
-var supressDetail bool
+
 
 func newThisWeekCommand() *cobra.Command {
 	me := &cobra.Command{
@@ -15,16 +16,15 @@ func newThisWeekCommand() *cobra.Command {
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
-	me.Flags().BoolVarP(&supressDetail, "supressDetail", "s", false, "詳細出力を抑制")
+	me.Flags().BoolVarP(&supressDetail_, "supressDetail", "s", false, "詳細出力を抑制")
+	me.Flags().BoolVarP(&postDocbase_, "postDocbase", "", false, "docbaseにポスト")
 	return me
 }
 
 func thisWeekCommand(cmd *cobra.Command, args []string) (err error) {
-	tglCl, err := readTogglClientConfig()
-	if err != nil { return err }
 
-	from := tglCl.StartDayOfThisWeek()
-	till := tglCl.After24Hours(from, 7)
+	from := tglo_core.StartDayOfThisWeek()
+	till := tglo_core.After24Hours(from, 7)
 
-	return tglCl.ProcessWeek(from, till, cmd.OutOrStdout(), !supressDetail)
+	return processWeek(from, till, postDocbase_, !supressDetail_)
 }

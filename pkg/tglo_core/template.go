@@ -3,10 +3,11 @@ package tglo_core
 import (
 	"text/template"
 	"strings"
+	"io"
 )
 
 
-func dayTemplate() *template.Template {
+func DayTemplate() *template.Template {
 	const letter = `
 @@@
 # {{.From}}の実績
@@ -34,7 +35,7 @@ tags
 	return template.Must(template.New("letter").Parse(strings.Replace(letter, "@", "`", -1)))
 }
 
-func weekTemplate() *template.Template {
+func WeekTemplate() *template.Template {
 	const letter = `
 ## Report[{{.From}} 〜 {{.Till}}]
 
@@ -62,4 +63,8 @@ func weekTemplate() *template.Template {
 `
 
 	return template.Must(template.New("letter").Parse(letter))
+}
+
+func TemplateExecute(template *template.Template, w io.Writer, content *OutputContent) (err error) {
+	return template.Execute(w, content)
 }

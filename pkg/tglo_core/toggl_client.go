@@ -7,32 +7,23 @@ import (
 	"fmt"
 	"time"
 	"github.com/snabb/isoweek"
-	"text/template"
 	"io"
 )
 
 type TogglClient struct {
 	ApiToken string
 	WorkSpaceId int
-	Verbose bool
+	VerboseOut io.Writer
 }
 
-func (me *TogglClient) ProcessDay(from time.Time, till time.Time, w io.Writer) (err error) {
-	return me.process(from, till, w, dayTemplate(), true)
-}
+func (me *TogglClient) Process(from time.Time, till time.Time, showDetail bool) (content *OutputContent, err error) {
 
-func (me *TogglClient) ProcessWeek(from time.Time, till time.Time, w io.Writer, showDetail bool) (err error) {
-	return me.process(from, till, w, weekTemplate(), showDetail)
-}
-
-func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, template *template.Template, showDetail bool) (err error) {
-
-	if me.Verbose {
+	if me.VerboseOut != nil {
 		toggl.EnableLog()
-		w.Write([]byte(fmt.Sprintln(from.Format(time.ANSIC))))
-		w.Write([]byte(fmt.Sprintln(from.Format(time.RFC3339))))
-		w.Write([]byte(fmt.Sprintln(till.Format(time.ANSIC))))
-		w.Write([]byte(fmt.Sprintln(till.Format(time.RFC3339))))	
+		me.VerboseOut.Write([]byte(fmt.Sprintln(from.Format(time.ANSIC))))
+		me.VerboseOut.Write([]byte(fmt.Sprintln(from.Format(time.RFC3339))))
+		me.VerboseOut.Write([]byte(fmt.Sprintln(till.Format(time.ANSIC))))
+		me.VerboseOut.Write([]byte(fmt.Sprintln(till.Format(time.RFC3339))))	
 	} else {
 		toggl.DisableLog()
 	}
@@ -40,38 +31,38 @@ func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, temp
 	session := toggl.OpenSession(me.ApiToken)
 
 	account, err := session.GetAccount()
-	if err != nil { return err }
+	if err != nil { return nil, err }
 
 	tags := account.Data.Tags
 	tagSumMap := makeTagDurationSumMap(tags)
 	//From(tags).ForEachT(func(tag toggl.Tag) {
-	//	w.Write([]byte(fmt.Sprintln(tag.Name)))
+	//	verboseOut.Write([]byte(fmt.Sprintln(tag.Name)))
 	//})
 
 	projects, err := session.GetProjects(me.WorkSpaceId)
-	if err != nil { return err }
+	if err != nil { return nil, err }
 	projectMap := makeProjectMap(projects)
 
 	summaryReport, err := session.GetSummaryReport(me.WorkSpaceId, from.Format(time.RFC3339), till.Format(time.RFC3339))
-	if err != nil { return err }
+	if err != nil { return nil, err }
 
-	//w.Write([]byte(fmt.Sprintf("total grand %d\n", summaryReport.TotalGrand)))
+	//verboseOut.Write([]byte(fmt.Sprintf("total grand %d\n", summaryReport.TotalGrand)))
 	
 	projectSummaries := []*ProjectSummary{}
 	for _, data := range summaryReport.Data {
 
 		projectSummaryItems := []*ProjectSummaryItem{}
 		for _, item := range data.Items {
-			//w.Write([]byte(fmt.Sprintf("item %s %d\n", item.Title["time_entry"], item.Time)))
+			//verboseOut.Write([]byte(fmt.Sprintf("item %s %d\n", item.Title["time_entry"], item.Time)))
 			projectSummaryItems = append(projectSummaryItems, newProjectSummaryItem(item.Title["time_entry"], int64(item.Time)))
 		}
 
-		//w.Write([]byte(fmt.Sprintf("project %s %d\n", data.Title.Project, data.Time)))
+		//verboseOut.Write([]byte(fmt.Sprintf("project %s %d\n", data.Title.Project, data.Time)))
 		projectSummaries = append(projectSummaries, newProjectSummary(data.Title.Project, int64(data.Time), showDetail, projectSummaryItems))
 	}
 
 	timeEntries, err := session.GetTimeEntries(from, till)
-	if err != nil { return err }
+	if err != nil { return nil, err }
 
 	timeEntryDetails := []*TimeEntryDetail{}
 	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
@@ -93,28 +84,25 @@ func (me *TogglClient) process(from time.Time, till time.Time, w io.Writer, temp
 		}).
 		ToSlice(&tagSummaries)
 
-	content := newOutputContent(from, till, int64(summaryReport.TotalGrand), timeEntryDetails, projectSummaries, tagSummaries)
+	content = newOutputContent(from, till, int64(summaryReport.TotalGrand), timeEntryDetails, projectSummaries, tagSummaries)
 
-	err = template.Execute(w, content)
-	if err != nil { return err }
-
-	return nil
+	return content, nil
 }
 
-func (me *TogglClient) Date(dateS string) (date time.Time, err error) {
+func Date(dateS string) (date time.Time, err error) {
 	date, err = time.Parse("2006-01-02 MST", fmt.Sprintf("%s JST", dateS))
 	if err != nil { return date, err }
 
 	return date, nil
 }
 
-func (me *TogglClient) Today() (date time.Time) {
+func Today() (date time.Time) {
 	date = time.Now()
 	date = date.Truncate( time.Hour ).Add( - time.Duration(date.Hour()) * time.Hour )
 	return date
 }
 
-func (me *TogglClient) Yesterday() (time.Time) {
+func Yesterday() (time.Time) {
 	r := time.Now().AddDate(0, 0, -1)
 	return r.Truncate( time.Hour ).Add( - time.Duration(r.Hour()) * time.Hour )
 }
@@ -124,7 +112,7 @@ func daysAgo(date time.Time, days int) (time.Time) {
 	return r.Truncate( time.Hour ).Add( - time.Duration(r.Hour()) * time.Hour )
 }
 
-func (me *TogglClient) After24Hours(date time.Time, days time.Duration) (time.Time) {
+func After24Hours(date time.Time, days time.Duration) (time.Time) {
 	return date.Add((days * 24 * 60 * 60 - 1) * time.Second)
 }
 
@@ -137,12 +125,12 @@ func startDayOfWeek(date time.Time) (time.Time) {
 	return r
 }
 
-func (me *TogglClient) StartDayOfThisWeek() (time.Time) {
-	return startDayOfWeek(me.Today())
+func StartDayOfThisWeek() (time.Time) {
+	return startDayOfWeek(Today())
 }
 
-func (me *TogglClient) StartDayOfLastWeek() (time.Time) {
-	return startDayOfWeek(daysAgo(me.Today(), 7))
+func StartDayOfLastWeek() (time.Time) {
+	return startDayOfWeek(daysAgo(Today(), 7))
 }
 
 func jst() *time.Location {

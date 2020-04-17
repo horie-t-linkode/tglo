@@ -4,10 +4,13 @@ import (
   "os"
   "github.com/spf13/cobra"
   "tglo_cli/mylogger"
+  "io"
 )
 
 var logger = mylogger.GetLogger()
-var verbose bool
+var verbose_ bool
+var commandOut_ io.Writer
+var verboseOut_ io.Writer
 
 func NewRootCommand() *cobra.Command {
   me := &cobra.Command{
@@ -20,11 +23,14 @@ func NewRootCommand() *cobra.Command {
 		SilenceErrors: true,
   }
 
-  me.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "開発者用デバッグ出力")
+  me.PersistentFlags().BoolVarP(&verbose_, "verbose", "v", false, "開発者用デバッグ出力")
 
   cobra.OnInitialize(func() {
-    if verbose {
+    if verbose_ {
       mylogger.SetLevelDebug()
+      verboseOut_ = me.OutOrStdout()
+    } else {
+      verboseOut_ = nil
     }
   })
 
@@ -34,6 +40,8 @@ func NewRootCommand() *cobra.Command {
   me.AddCommand(newYesterdayCommand())
   me.AddCommand(newThisWeekCommand())
   me.AddCommand(newLastWeekCommand())
+
+  commandOut_ = me.OutOrStdout()
   
   return me
 } 

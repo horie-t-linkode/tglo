@@ -27,7 +27,7 @@ func readTogglClientConfig() (me *tglo_core.TogglClient, err error) {
     return nil, errors.New(fmt.Sprintf("TGLO_TOGGL_WORKSPACEID: %s", err.Error()))
   }
 
-  return &tglo_core.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, Verbose: verbose}, nil
+  return &tglo_core.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, VerboseOut: verboseOut_}, nil
 }
 
 func readDocbaseClientConfig() (me *tglo_core.DocbaseClient, err error) {
