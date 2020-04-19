@@ -67,12 +67,14 @@ func (me *TogglClient) Process(from time.Time, till time.Time, showDetail bool) 
 
 	timeEntryDetails := []*template.TimeEntryDetail{}
 	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
-		start := te.Start.In(time_util.Jst())
-		stop := te.Stop.In(time_util.Jst())
-		From(te.Tags).ForEachT(func(tagname string) {
-			tagSumMap[tagname] = tagSumMap[tagname] + te.Duration
-		})
-		timeEntryDetails = append(timeEntryDetails, template.NewTimeEntryDetail(int64(te.Duration), start, stop, projectMap[te.Pid], te.Description))
+		if te.Stop != nil { // タイマー実行中のエントリは対象から外す。
+			start := te.Start.In(time_util.Jst())
+			stop := te.Stop.In(time_util.Jst())
+			From(te.Tags).ForEachT(func(tagname string) {
+				tagSumMap[tagname] = tagSumMap[tagname] + te.Duration
+			})
+			timeEntryDetails = append(timeEntryDetails, template.NewTimeEntryDetail(int64(te.Duration), start, stop, projectMap[te.Pid], te.Description))
+		}
 	})
 
 	tagSummaries := []*template.TagSummary{}
