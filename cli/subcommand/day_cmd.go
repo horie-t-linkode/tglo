@@ -33,7 +33,7 @@ func dayCommand(cmd *cobra.Command, args []string) (err error) {
 }
 
 func processDay(from time.Time, till time.Time) (err error) {
-	tglCl, err := readTogglClientConfig()
+	tglCl, err := readTogglClientConfig(verboseOut_)
 	if err != nil { return err }
 
 	content, err := tglCl.Process(from, till, true)

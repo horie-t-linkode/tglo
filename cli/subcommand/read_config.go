@@ -4,6 +4,7 @@ import (
   "errors"
   "fmt"
   "os"
+  "io"
   "strconv"
   "strings"
   "github.com/joho/godotenv"
@@ -11,7 +12,7 @@ import (
   "github.com/masaki-linkode/tglo/pkg/tglo_core/docbase_client"
 )
 
-func readTogglClientConfig() (me *toggl_client.TogglClient, err error) {
+func readTogglClientConfig(verboseOut io.Writer) (me *toggl_client.TogglClient, err error) {
   _ = godotenv.Load()
   
   apiToken := os.Getenv("TGLO_TOGGL_APITOKEN")
@@ -28,10 +29,10 @@ func readTogglClientConfig() (me *toggl_client.TogglClient, err error) {
     return nil, errors.New(fmt.Sprintf("TGLO_TOGGL_WORKSPACEID: %s", err.Error()))
   }
 
-  return &toggl_client.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, VerboseOut: verboseOut_}, nil
+  return &toggl_client.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, VerboseOut: verboseOut}, nil
 }
 
-func readDocbaseClientConfig() (me *docbase_client.DocbaseClient, err error) {
+func readDocbaseClientConfig(verboseOut io.Writer) (me *docbase_client.DocbaseClient, err error) {
   _ = godotenv.Load()
 
   domain := os.Getenv("TGLO_DOCBASE_DOMAIN")
@@ -72,5 +73,6 @@ func readDocbaseClientConfig() (me *docbase_client.DocbaseClient, err error) {
     PostingTitle: postingTitle,
     PostingTags: strings.Split(postingTags, ","),
     PostingGroupIds: postingGroupIds,
+    VerboseOut: verboseOut,
     }, nil
 }

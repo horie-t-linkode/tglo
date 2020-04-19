@@ -42,7 +42,7 @@ func weekCommand(cmd *cobra.Command, args []string) (err error) {
 
 func processWeek(from time.Time, till time.Time, postDocbase bool, showDetail bool) (err error) {
 
-	tglCl, err := readTogglClientConfig()
+	tglCl, err := readTogglClientConfig(verboseOut_)
 	if err != nil { return err }
 
 	content, err := tglCl.Process(from, till, showDetail)
@@ -55,7 +55,7 @@ func processWeek(from time.Time, till time.Time, postDocbase bool, showDetail bo
 
 	writers := []io.Writer{commandOut_}
 	if postDocbase {
-		docbaseCl, err := readDocbaseClientConfig()
+		docbaseCl, err := readDocbaseClientConfig(verboseOut_)
 		docbaseCl.PostingTitle = fmt.Sprintf("%s [%s 〜 %s]", docbaseCl.PostingTitle, content.From, content.Till)
 		if err != nil { return err }
 

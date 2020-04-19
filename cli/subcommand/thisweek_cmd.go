@@ -5,8 +5,6 @@ import (
 	"github.com/masaki-linkode/tglo/pkg/tglo_core/time_util"
 )
 
-
-
 func newThisWeekCommand() *cobra.Command {
 	me := &cobra.Command{
 		Use: "thisweek",

@@ -1,6 +1,7 @@
 package docbase_client
 
 import (
+	"io"
 	"fmt"
 	"context"
 	"encoding/json"
@@ -14,10 +15,11 @@ type DocbaseClient struct {
 	PostingTitle string
 	PostingTags []string
 	PostingGroupIds []int
+	VerboseOut io.Writer
 }
 
 func (me *DocbaseClient) Write(bs []byte) (n int, err error) {	
-  	fmt.Printf("%s %s\n", me.Domain, me.AccessToken)
+	me.verbose(fmt.Sprintf("%s %s\n", me.Domain, me.AccessToken))
   	client := docbase.NewAuthClient(me.Domain, me.AccessToken)
 
 	  var postingGroupIds []docbase.GroupID
@@ -26,7 +28,7 @@ func (me *DocbaseClient) Write(bs []byte) (n int, err error) {
 		  return docbase.GroupID(n)
 	  }).
 	  ToSlice(&postingGroupIds)
-	  fmt.Printf("%v\n", postingGroupIds)
+	  me.verbose(fmt.Sprintf("%v\n", postingGroupIds))
 
 	body := string(bs)
 	post, res, err := client.
@@ -40,9 +42,9 @@ func (me *DocbaseClient) Write(bs []byte) (n int, err error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println(jsonify(post))
+	me.verbose(fmt.Sprintln(jsonify(post)))
 	//fmt.Println(jsonify(res))
-	fmt.Println(res.Response.StatusCode)
+	me.verbose(fmt.Sprintln(res.Response.StatusCode))
 
 	//samplePost = *post
 
@@ -55,4 +57,10 @@ func jsonify(o interface{}) string {
 		return err.Error()
 	}
 	return string(buf)
+}
+
+func (me *DocbaseClient) verbose(s string) {
+	if me.VerboseOut != nil {
+		me.VerboseOut.Write([]byte(s))
+	}
 }
