@@ -24,3 +24,4 @@ prod:
 	$(MAKE) build-base BUILD_TAGS=$(BUILD_TAGS_PRODUCTION) LDFLAGS_OPT=$(LDFLAGS_PROD) GOOS=linux GOARCH=amd64 BIN_NAME=../bin/linux/tglo
 	$(MAKE) build-base BUILD_TAGS=$(BUILD_TAGS_PRODUCTION) LDFLAGS_OPT=$(LDFLAGS_PROD) GOOS=windows GOARCH=amd64 BIN_NAME=../bin/windows/tglo.exe
 	$(MAKE) build-base BUILD_TAGS=$(BUILD_TAGS_PRODUCTION) LDFLAGS_OPT=$(LDFLAGS_PROD) GOOS=darwin GOARCH=amd64 BIN_NAME=../bin/osx/tglo
+	zip -r tglo.$(VERSION).$(REVISION).zip bin/
