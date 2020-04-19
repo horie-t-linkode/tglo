@@ -47,6 +47,8 @@ TGLO_DOCBASE_POSTING_TAGS=<docbaseメモ投稿時のタグ。「,」区切りで
 TGLO_DOCBASE_POSTING_GROUPS=<docbaseメモ投稿先のグループID。「,」区切りで指定。>
 ```
 
+TGLO_DOCBASE_<...>はdocbase出力するときに必要。(後述)
+
 #### 環境変数
 
 環境変数として以下の名前を設定する。
@@ -98,7 +100,7 @@ Use "tglo [command] --help" for more information about a command.
 > ./tglo day --date 2020-04-10
 ```
 
-今週分、先週分、指定日を含む週分のエントリを出力する。
+今週分、先週分、指定日を含む週分のサマリ/エントリを出力する。
 ```
 > ./tglo thisweek
 > ./tglo thisweek -s
@@ -108,7 +110,7 @@ Use "tglo [command] --help" for more information about a command.
 > ./tglo week --date 2020-04-10 -s
 ```
 
-週分のエントリをdocbaseにメモとして作成する。
+週分のサマリ/エントリをdocbaseにメモとして作成する。
 ```
 > ./tglo lastweek --postDocbase
 ```
