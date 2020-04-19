@@ -1,3 +1,5 @@
 .env
 cli/tglo
 bin/
+tglo
+.vscode/

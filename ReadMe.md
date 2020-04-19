@@ -10,9 +10,18 @@
 
 (現時点では)ビルドはlinux環境で行う。
 
+開発用ビルド
 ```
 $ cd tglo
-$ ./build_for_linux.sh
+$ make
+$ ls tglo
+tglo
+```
+
+リリース用ビルド
+```
+$ cd tglo
+$ make prod
 $ ls bin/
 linux  osx  windows
 $ ls bin/linux/
