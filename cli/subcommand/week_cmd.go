@@ -26,6 +26,7 @@ func newWeekCommand() *cobra.Command {
 	me.MarkFlagRequired("date")
 	me.Flags().BoolVarP(&supressDetail_, "supressDetail", "s", false, "詳細出力を抑制")
 	me.Flags().BoolVarP(&postDocbase_, "postDocbase", "", false, "docbaseにポスト")
+	me.Flags().BoolVarP(&postSlack_, "postSlack", "", false, "slackにポスト")
 	return me
 }
 
@@ -37,10 +38,10 @@ func weekCommand(cmd *cobra.Command, args []string) (err error) {
 	from := time_util.StartDayOfWeek(date)
 	till := time_util.After24Hours(from, 7)
 
-	return processWeek(from, till, postDocbase_, !supressDetail_)
+	return processWeek(from, till, postDocbase_, postSlack_, !supressDetail_)
 }
 
-func processWeek(from time.Time, till time.Time, postDocbase bool, showDetail bool) (err error) {
+func processWeek(from time.Time, till time.Time, postDocbase bool, postSlack bool, showDetail bool) (err error) {
 
 	tglCl, err := readTogglClientConfig(verboseOut_)
 	if err != nil { return err }
@@ -49,9 +50,12 @@ func processWeek(from time.Time, till time.Time, postDocbase bool, showDetail bo
 	if err != nil { return err }
 
 	var buffer bytes.Buffer
-	err = template.TemplateExecute(template.WeekTemplate(), &buffer, content)
+	if showDetail {
+		err = template.TemplateExecute(template.WeekTemplate(), &buffer, content)
+	} else {
+		err = template.TemplateExecute(template.WeekTemplateSupressDetail(), &buffer, content)
+	}
 	if err != nil { return err }
-
 
 	writers := []io.Writer{commandOut_}
 	if postDocbase {
@@ -60,6 +64,12 @@ func processWeek(from time.Time, till time.Time, postDocbase bool, showDetail bo
 		if err != nil { return err }
 
 		writers = append(writers, docbaseCl)
+	}
+	if postSlack {
+		slackCl, err := readSlackConfig(verboseOut_)
+		if err != nil { return err }
+	
+		writers = append(writers, slackCl)
 	}
 	mw := io.MultiWriter(writers...)
 	_, err = buffer.WriteTo(mw)

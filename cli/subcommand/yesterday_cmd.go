@@ -14,6 +14,7 @@ func newYesterdayCommand() *cobra.Command {
 		SilenceUsage: true,
 		SilenceErrors: true,
 	}
+	me.Flags().BoolVarP(&postSlack_, "postSlack", "", false, "slackにポスト")
 	return me
 }
 
@@ -22,5 +23,5 @@ func yesterdayCommand(cmd *cobra.Command, args []string) (err error) {
 	from := time_util.Yesterday()
 	till := time_util.After24Hours(from, 1)
 
-	return processDay(from, till)
+	return processDay(from, till, postSlack_)
 }

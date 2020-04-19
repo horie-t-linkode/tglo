@@ -1,5 +1,4 @@
-
-package toggl_client
+package tglo_core
 
 import (
 	"github.com/jason0x43/go-toggl"

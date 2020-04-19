@@ -7,6 +7,8 @@ require (
 	github.com/jason0x43/go-toggl v0.0.0-20191006134724-98db1b5443ff
 	github.com/joho/godotenv v1.3.0
 	github.com/masaki-linkode/tglo/pkg/tglo_core v0.0.0
+	github.com/masaki-linkode/tglo/pkg/tglo_core/template v0.0.0
+	github.com/masaki-linkode/tglo/pkg/tglo_core/time_util v0.0.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.6.3
@@ -14,3 +16,7 @@ require (
 )
 
 replace github.com/masaki-linkode/tglo/pkg/tglo_core v0.0.0 => ../pkg/tglo_core
+
+replace github.com/masaki-linkode/tglo/pkg/tglo_core/template v0.0.0 => ../pkg/tglo_core/template
+
+replace github.com/masaki-linkode/tglo/pkg/tglo_core/time_util v0.0.0 => ../pkg/tglo_core/time_util

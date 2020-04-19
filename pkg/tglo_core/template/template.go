@@ -65,6 +65,31 @@ func WeekTemplate() *template.Template {
 	return template.Must(template.New("letter").Parse(letter))
 }
 
+func WeekTemplateSupressDetail() *template.Template {
+	const letter = `
+@@@
+## Report[{{.From}} 〜 {{.Till}}]
+
+- total {{.DurationTotal}}
+
+{{with .ProjectSummaries -}}
+{{- range . -}}
+### [{{.Duration}}] {{.Name}}
+{{end -}}
+{{end}}
+
+### tags
+{{with .TagSummaries -}}
+{{range . -}}
+- [{{.Duration}}] {{.Ratio}} {{.Name}}
+{{end -}}
+{{end -}}
+@@@
+`
+
+	return template.Must(template.New("letter").Parse(strings.Replace(letter, "@", "`", -1)))
+}
+
 func TemplateExecute(template *template.Template, w io.Writer, content *OutputContent) (err error) {
 	return template.Execute(w, content)
 }

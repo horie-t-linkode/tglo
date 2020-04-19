@@ -28,9 +28,13 @@ $ ls bin/linux/
 tglo
 ```
 
-### togglのAPIトークン、WORKSPACEIDの指定
+### togglのAPIトークン、WORKSPACEID、その他の指定
 
 本プログラム実行時に対象とするtogglアカウントのAPIトークン、WORKSPACEIDを指定する必要がある。  
+
+docbaseにメモを投稿する場合は、docbaseのドメイン、アクセストークン、タグ、グループIDを指定する必要がある。  
+slackにポストする場合は、事前にSlackAppを作成し権限を設定した後、OAuthTokenとチャネルIDを指定する必要がある。
+
 指定する方法は以下の2通りある。
 
 #### .envファイル
@@ -45,9 +49,9 @@ TGLO_DOCBASE_ACCESSTOKEN=<あなたのdocbaseのアクセストークン>
 TGLO_DOCBASE_POSTING_TITLE=<docbaseメモ投稿時のタイトル>
 TGLO_DOCBASE_POSTING_TAGS=<docbaseメモ投稿時のタグ。「,」区切りで指定。>
 TGLO_DOCBASE_POSTING_GROUPS=<docbaseメモ投稿先のグループID。「,」区切りで指定。>
+TGLO_SLACK_OAUTHACCESSTOKEN=<あなたのインストール済みslackのAppのOAuth Access Token。以下のscopeを与える必要がある。chat:write>
+TGLO_SLACK_POSTINGCHANNELID=<slackの投稿先チャネルID>
 ```
-
-TGLO_DOCBASE_<...>はdocbase出力するときに必要。(後述)
 
 #### 環境変数
 
@@ -60,6 +64,8 @@ TGLO_DOCBASE_<...>はdocbase出力するときに必要。(後述)
 - TGLO_DOCBASE_POSTING_TITLE
 - TGLO_DOCBASE_POSTING_TAGS
 - TGLO_DOCBASE_POSTING_GROUPS
+- TGLO_SLACK_OAUTHACCESSTOKEN
+- TGLO_SLACK_POSTINGCHANNELID
 
 各変数の値の内容については「.envファイル」を参照。
 
@@ -113,4 +119,9 @@ Use "tglo [command] --help" for more information about a command.
 週分のサマリ/エントリをdocbaseにメモとして作成する。
 ```
 > ./tglo lastweek --postDocbase
+```
+
+本日のエントリをslackに投稿する。
+```
+> ./tglo today --postSlack
 ```

@@ -1,4 +1,4 @@
-package docbase_client
+package tglo_core
 
 import (
 	"io"
