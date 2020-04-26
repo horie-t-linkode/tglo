@@ -88,6 +88,8 @@ func readSlackConfig(verboseOut io.Writer) (me *tglo_core.SlackClient, err error
   if postingChannelID == "" {
     return nil, errors.New(fmt.Sprintf("TGLO_SLACK_POSTINGCHANNELID is empty"))
   }
+  
+  postingTitle := os.Getenv("TGLO_SLACK_POSTINGTITLE")
 
-  return &tglo_core.SlackClient{OAuthAccessToken: oAuthAccessToken, PostingChannelID: postingChannelID, VerboseOut: verboseOut}, nil
+  return &tglo_core.SlackClient{OAuthAccessToken: oAuthAccessToken, PostingChannelID: postingChannelID, PostingTitle:postingTitle, VerboseOut: verboseOut}, nil
 }
