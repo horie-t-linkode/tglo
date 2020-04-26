@@ -46,7 +46,7 @@ func processWeek(from time.Time, till time.Time, postDocbase bool, postSlack boo
 	tglCl, err := readTogglClientConfig(verboseOut_)
 	if err != nil { return err }
 
-	content, err := tglCl.Process(from, till, showDetail)
+	content, err := tglCl.Process(from, till)
 	if err != nil { return err }
 
 	var buffer bytes.Buffer

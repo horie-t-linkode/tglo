@@ -20,6 +20,8 @@ type OutputContent struct {
 	TimeEntryDetails []*TimeEntryDetail
 	ProjectSummaries []*ProjectSummary
 	TagSummaries []*TagSummary
+	Comments []*Comment
+	Plans []*Plan
 }
 
 type TimeEntryDetail struct {
@@ -33,7 +35,6 @@ type TimeEntryDetail struct {
 type ProjectSummary struct {
 	Name string
 	Duration string
-	ShowDetail bool
 	Items []*ProjectSummaryItem
 }
 
@@ -48,7 +49,15 @@ type TagSummary struct {
 	Ratio string
 }
 
-func NewOutputContent(from time.Time, till time.Time, durationTotal int64, timeEntryDetails []*TimeEntryDetail, projectSummaries []*ProjectSummary, tagSummaries []*TagSummary) (*OutputContent) {
+type Comment struct {
+	Description string
+}
+
+type Plan struct {
+	Description string
+}
+
+func NewOutputContent(from time.Time, till time.Time, durationTotal int64, timeEntryDetails []*TimeEntryDetail, projectSummaries []*ProjectSummary, tagSummaries []*TagSummary, comments []*Comment, plans []*Plan) (*OutputContent) {
 	me := &OutputContent{
 		From: from.Format("2006-01-02"),
 		Till: till.Format("2006-01-02"),
@@ -56,6 +65,8 @@ func NewOutputContent(from time.Time, till time.Time, durationTotal int64, timeE
 		TimeEntryDetails: timeEntryDetails,
 		ProjectSummaries: projectSummaries,
 		TagSummaries: tagSummaries,
+		Comments: comments,
+		Plans: plans,
 	}
 
 	return me
@@ -74,11 +85,10 @@ func NewTimeEntryDetail(duration int64, from time.Time, till time.Time, projectN
 	return me
 }
 
-func NewProjectSummary(name string, duration int64, showDetail bool, items []*ProjectSummaryItem) (*ProjectSummary) {
+func NewProjectSummary(name string, duration int64, items []*ProjectSummaryItem) (*ProjectSummary) {
 	me := &ProjectSummary {
 		Name: name,
 		Duration: fmtDurationHHMM(time.Duration(duration/1000) * time.Second),
-		ShowDetail: showDetail,
 		Items: items,
 	}
 
@@ -100,6 +110,22 @@ func NewTagSummary(name string, duration int64, durationTotal int64) (*TagSummar
 		Name: name,
 		Duration: fmtDurationHHMM(time.Duration(duration) * time.Second),
 		Ratio: fmt.Sprintf("%6.2f%%", float64(duration) * float64(100) / float64(durationTotal/1000)),
+	}
+
+	return me
+}
+
+func NewComment(description string) (*Comment) {
+	me := &Comment {
+		Description: description,
+	}
+
+	return me
+}
+
+func NewPlan(description string) (*Plan) {
+	me := &Plan {
+		Description: description,
 	}
 
 	return me
