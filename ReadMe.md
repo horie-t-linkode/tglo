@@ -51,6 +51,7 @@ TGLO_DOCBASE_POSTING_TAGS=<docbaseメモ投稿時のタグ。「,」区切りで
 TGLO_DOCBASE_POSTING_GROUPS=<docbaseメモ投稿先のグループID。「,」区切りで指定。>
 TGLO_SLACK_OAUTHACCESSTOKEN=<あなたのインストール済みslackのAppのOAuth Access Token。以下のscopeを与える必要がある。chat:write>
 TGLO_SLACK_POSTINGCHANNELID=<slackの投稿先チャネルID>
+TGLO_SLACK_POSTINGTITLE=<slack投稿時のタイトル>
 ```
 
 #### 環境変数
@@ -66,6 +67,7 @@ TGLO_SLACK_POSTINGCHANNELID=<slackの投稿先チャネルID>
 - TGLO_DOCBASE_POSTING_GROUPS
 - TGLO_SLACK_OAUTHACCESSTOKEN
 - TGLO_SLACK_POSTINGCHANNELID
+- TGLO_SLACK_POSTINGTITLE
 
 各変数の値の内容については「.envファイル」を参照。
 
@@ -116,7 +118,7 @@ Use "tglo [command] --help" for more information about a command.
 > ./tglo week --date 2020-04-10 -s
 ```
 
-週分のサマリ/エントリをdocbaseにメモとして作成する。
+先週分のサマリ/エントリをdocbaseにメモとして作成する。
 ```
 > ./tglo lastweek --postDocbase
 ```
