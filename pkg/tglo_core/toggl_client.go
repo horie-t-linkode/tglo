@@ -1,5 +1,4 @@
-
-package toggl_client
+package tglo_core
 
 import (
 	"github.com/jason0x43/go-toggl"
@@ -17,7 +16,7 @@ type TogglClient struct {
 	VerboseOut io.Writer
 }
 
-func (me *TogglClient) Process(from time.Time, till time.Time, showDetail bool) (content *template.OutputContent, err error) {
+func (me *TogglClient) Process(from time.Time, till time.Time) (content *template.OutputContent, err error) {
 
 	if me.VerboseOut != nil {
 		toggl.EnableLog()
@@ -55,25 +54,46 @@ func (me *TogglClient) Process(from time.Time, till time.Time, showDetail bool) 
 		projectSummaryItems := []*template.ProjectSummaryItem{}
 		for _, item := range data.Items {
 			//verboseOut.Write([]byte(fmt.Sprintf("item %s %d\n", item.Title["time_entry"], item.Time)))
-			projectSummaryItems = append(projectSummaryItems, template.NewProjectSummaryItem(item.Title["time_entry"], int64(item.Time)))
+			if int64(item.Time) > 0 {
+				projectSummaryItems = append(projectSummaryItems, template.NewProjectSummaryItem(item.Title["time_entry"], int64(item.Time)))
+			}
 		}
 
 		//verboseOut.Write([]byte(fmt.Sprintf("project %s %d\n", data.Title.Project, data.Time)))
-		projectSummaries = append(projectSummaries, template.NewProjectSummary(data.Title.Project, int64(data.Time), showDetail, projectSummaryItems))
+		if int64(data.Time) > 0 {
+			projectSummaries = append(projectSummaries, template.NewProjectSummary(data.Title.Project, int64(data.Time), projectSummaryItems))
+		}
 	}
 
 	timeEntries, err := session.GetTimeEntries(from, till)
 	if err != nil { return nil, err }
 
+	comments := []*template.Comment{}
+	plans := []*template.Plan{}
 	timeEntryDetails := []*template.TimeEntryDetail{}
 	From(timeEntries).ForEachT(func(te toggl.TimeEntry) {
 		if te.Stop != nil { // タイマー実行中のエントリは対象から外す。
 			start := te.Start.In(time_util.Jst())
 			stop := te.Stop.In(time_util.Jst())
+			
+			isPrint := false
 			From(te.Tags).ForEachT(func(tagname string) {
 				tagSumMap[tagname] = tagSumMap[tagname] + te.Duration
+
+				if tagname == "__COMMENT" || tagname == "__PLAN" {
+					if tagname == "__COMMENT" {
+						comments = append(comments, template.NewComment(te.Description))
+					}
+					if tagname == "__PLAN" {
+						plans = append(plans, template.NewPlan(te.Description))
+					}
+				} else {
+					isPrint = true
+				}
 			})
-			timeEntryDetails = append(timeEntryDetails, template.NewTimeEntryDetail(int64(te.Duration), start, stop, projectMap[te.Pid], te.Description))
+			if isPrint {
+				timeEntryDetails = append(timeEntryDetails, template.NewTimeEntryDetail(int64(te.Duration), start, stop, projectMap[te.Pid], te.Description))
+			}
 		}
 	})
 
@@ -86,8 +106,8 @@ func (me *TogglClient) Process(from time.Time, till time.Time, showDetail bool) 
 			return template.NewTagSummary(tag.Name, tagSumMap[tag.Name], int64(summaryReport.TotalGrand))
 		}).
 		ToSlice(&tagSummaries)
-
-	content = template.NewOutputContent(from, till, int64(summaryReport.TotalGrand), timeEntryDetails, projectSummaries, tagSummaries)
+	
+	content = template.NewOutputContent(from, till, int64(summaryReport.TotalGrand), timeEntryDetails, projectSummaries, tagSummaries, comments, plans)
 
 	return content, nil
 }

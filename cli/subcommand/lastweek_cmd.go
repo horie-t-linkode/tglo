@@ -16,6 +16,7 @@ func newLastWeekCommand() *cobra.Command {
 	}
 	me.Flags().BoolVarP(&supressDetail_, "supressDetail", "s", false, "詳細出力を抑制")
 	me.Flags().BoolVarP(&postDocbase_, "postDocbase", "", false, "docbaseにポスト")
+	me.Flags().BoolVarP(&postSlack_, "postSlack", "", false, "slackにポスト")
 	return me
 }
 
@@ -24,5 +25,5 @@ func lastWeekCommand(cmd *cobra.Command, args []string) (err error) {
 	from := time_util.StartDayOfLastWeek()
 	till := time_util.After24Hours(from, 7)
 
-	return processWeek(from, till, postDocbase_, !supressDetail_)
+	return processWeek(from, till, postDocbase_, postSlack_, !supressDetail_)
 }

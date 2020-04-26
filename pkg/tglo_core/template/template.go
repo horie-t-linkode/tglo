@@ -27,9 +27,20 @@ tags
 {{end -}}
 
 @@@
+
 ・疑問点や気にかかっていること
+{{with .Comments -}}
+{{- range . -}}
+{{.Description}}
+{{end -}}
+{{end}}
 
 ・明日の作業予定
+{{with .Plans -}}
+{{- range . -}}
+{{.Description}}
+{{end -}}
+{{end -}}
 `
 
 	return template.Must(template.New("letter").Parse(strings.Replace(letter, "@", "`", -1)))
@@ -44,11 +55,9 @@ func WeekTemplate() *template.Template {
 {{with .ProjectSummaries -}}
 {{- range . -}}
 ### [{{.Duration}}] {{.Name}}
-{{if eq .ShowDetail true}}
 {{with .Items -}}
 {{- range . -}}
 - [{{.Duration}}] {{.Title}}
-{{end -}}
 {{end -}}
 {{end -}}
 {{end -}}
@@ -63,6 +72,31 @@ func WeekTemplate() *template.Template {
 `
 
 	return template.Must(template.New("letter").Parse(letter))
+}
+
+func WeekTemplateSupressDetail() *template.Template {
+	const letter = `
+@@@
+## Report[{{.From}} 〜 {{.Till}}]
+
+- total {{.DurationTotal}}
+
+{{with .ProjectSummaries -}}
+{{- range . -}}
+### [{{.Duration}}] {{.Name}}
+{{end -}}
+{{end}}
+
+### tags
+{{with .TagSummaries -}}
+{{range . -}}
+- [{{.Duration}}] {{.Ratio}} {{.Name}}
+{{end -}}
+{{end -}}
+@@@
+`
+
+	return template.Must(template.New("letter").Parse(strings.Replace(letter, "@", "`", -1)))
 }
 
 func TemplateExecute(template *template.Template, w io.Writer, content *OutputContent) (err error) {

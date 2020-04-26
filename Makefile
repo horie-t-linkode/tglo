@@ -15,7 +15,18 @@ LDFLAGS_PROD := -s -w
 LDFLAGS := "$(LDFLAGS_VERSION) $(LDFLAGS_REVISION) $(LDFLAGS_BUILDDATE) $(LDFLAGS_OPT)"
 
 build-base:
-	cd cli; go build -o $(BIN_NAME) -tags '$(BUILD_TAGS)' -ldflags=$(LDFLAGS); cd ..
+	cd pkg/tglo_core; \
+	cd template; \
+	go build; \
+	cd ..; \
+	cd time_util; \
+	go build; \
+	cd ..; \
+	go build; \
+	cd ../..; \
+	cd cli; \
+	go build -o $(BIN_NAME) -tags '$(BUILD_TAGS)' -ldflags=$(LDFLAGS); \
+	cd ..
 
 dev:
 	$(MAKE) build-base BUILD_TAGS=$(BUILD_TAGS_DEVELOPMENT) BIN_NAME=../tglo

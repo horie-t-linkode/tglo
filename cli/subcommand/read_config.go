@@ -8,11 +8,10 @@ import (
   "strconv"
   "strings"
   "github.com/joho/godotenv"
-  "github.com/masaki-linkode/tglo/pkg/tglo_core/toggl_client"
-  "github.com/masaki-linkode/tglo/pkg/tglo_core/docbase_client"
+  "github.com/masaki-linkode/tglo/pkg/tglo_core"
 )
 
-func readTogglClientConfig(verboseOut io.Writer) (me *toggl_client.TogglClient, err error) {
+func readTogglClientConfig(verboseOut io.Writer) (me *tglo_core.TogglClient, err error) {
   _ = godotenv.Load()
   
   apiToken := os.Getenv("TGLO_TOGGL_APITOKEN")
@@ -29,10 +28,10 @@ func readTogglClientConfig(verboseOut io.Writer) (me *toggl_client.TogglClient, 
     return nil, errors.New(fmt.Sprintf("TGLO_TOGGL_WORKSPACEID: %s", err.Error()))
   }
 
-  return &toggl_client.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, VerboseOut: verboseOut}, nil
+  return &tglo_core.TogglClient{ApiToken: apiToken, WorkSpaceId: workspaceId, VerboseOut: verboseOut}, nil
 }
 
-func readDocbaseClientConfig(verboseOut io.Writer) (me *docbase_client.DocbaseClient, err error) {
+func readDocbaseClientConfig(verboseOut io.Writer) (me *tglo_core.DocbaseClient, err error) {
   _ = godotenv.Load()
 
   domain := os.Getenv("TGLO_DOCBASE_DOMAIN")
@@ -67,7 +66,7 @@ func readDocbaseClientConfig(verboseOut io.Writer) (me *docbase_client.DocbaseCl
     postingGroupIds = append(postingGroupIds, n)
   }
 
-  return &docbase_client.DocbaseClient{
+  return &tglo_core.DocbaseClient{
     AccessToken: accessToken, 
     Domain: domain, 
     PostingTitle: postingTitle,
@@ -75,4 +74,22 @@ func readDocbaseClientConfig(verboseOut io.Writer) (me *docbase_client.DocbaseCl
     PostingGroupIds: postingGroupIds,
     VerboseOut: verboseOut,
     }, nil
+}
+
+func readSlackConfig(verboseOut io.Writer) (me *tglo_core.SlackClient, err error) {
+  _ = godotenv.Load()
+  
+  oAuthAccessToken := os.Getenv("TGLO_SLACK_OAUTHACCESSTOKEN")
+  if oAuthAccessToken == "" {
+    return nil, errors.New(fmt.Sprintf("TGLO_SLACK_OAUTHACCESSTOKEN is empty"))
+  }
+  
+  postingChannelID := os.Getenv("TGLO_SLACK_POSTINGCHANNELID")
+  if postingChannelID == "" {
+    return nil, errors.New(fmt.Sprintf("TGLO_SLACK_POSTINGCHANNELID is empty"))
+  }
+  
+  postingTitle := os.Getenv("TGLO_SLACK_POSTINGTITLE")
+
+  return &tglo_core.SlackClient{OAuthAccessToken: oAuthAccessToken, PostingChannelID: postingChannelID, PostingTitle:postingTitle, VerboseOut: verboseOut}, nil
 }
