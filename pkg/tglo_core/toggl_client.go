@@ -76,7 +76,7 @@ func (me *TogglClient) Process(from time.Time, till time.Time) (content *templat
 			start := te.Start.In(time_util.Jst())
 			stop := te.Stop.In(time_util.Jst())
 			
-			isPrint := false
+			isPrint := true
 			From(te.Tags).ForEachT(func(tagname string) {
 				tagSumMap[tagname] = tagSumMap[tagname] + te.Duration
 
@@ -87,8 +87,7 @@ func (me *TogglClient) Process(from time.Time, till time.Time) (content *templat
 					if tagname == "__PLAN" {
 						plans = append(plans, template.NewPlan(te.Description))
 					}
-				} else {
-					isPrint = true
+					isPrint = false
 				}
 			})
 			if isPrint {
