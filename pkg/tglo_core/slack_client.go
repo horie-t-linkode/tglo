@@ -26,8 +26,11 @@ func (me *SlackClient) Write(bs []byte) (n int, err error) {
 	buf.WriteString(s)
 	message := buf.String()
 
+	params := slack.NewPostMessageParameters()
+	//fmt.Printf("%#v", params)
+	params.Parse = "full"
 	channelID, timestamp, err := api.
-		PostMessage(me.PostingChannelID, slack.MsgOptionText(message, false))
+		PostMessage(me.PostingChannelID, slack.MsgOptionText(message, false), slack.MsgOptionPostMessageParameters(params))
 	if err != nil {
 		return 0, err
 	}
