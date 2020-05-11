@@ -61,7 +61,7 @@ func (me *TogglClient) Process(from time.Time, till time.Time) (content *templat
 
 		//verboseOut.Write([]byte(fmt.Sprintf("project %s %d\n", data.Title.Project, data.Time)))
 		if int64(data.Time) > 0 {
-			projectSummaries = append(projectSummaries, template.NewProjectSummary(data.Title.Project, int64(data.Time), projectSummaryItems))
+			projectSummaries = append(projectSummaries, template.NewProjectSummary(data.Title.Project, int64(data.Time), int64(summaryReport.TotalGrand), projectSummaryItems))
 		}
 	}
 
@@ -78,7 +78,7 @@ func (me *TogglClient) Process(from time.Time, till time.Time) (content *templat
 			
 			isPrint := true
 			From(te.Tags).ForEachT(func(tagname string) {
-				tagSumMap[tagname] = tagSumMap[tagname] + te.Duration
+				tagSumMap[tagname] = tagSumMap[tagname] + int64(te.Duration)
 
 				if tagname == "__COMMENT" || tagname == "__PLAN" {
 					if tagname == "__COMMENT" {

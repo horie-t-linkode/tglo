@@ -41,6 +41,7 @@ func NewRootCommand() *cobra.Command {
   me.AddCommand(newWeekCommand())
   me.AddCommand(newThisWeekCommand())
   me.AddCommand(newLastWeekCommand())
+  me.AddCommand(newDurationCommand())
 
   commandOut_ = me.OutOrStdout()
   
