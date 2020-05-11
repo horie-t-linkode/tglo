@@ -24,8 +24,14 @@ tags
 {{- range . -}}
 - [{{.Duration}}] {{.Ratio}} {{.Name}}
 {{end -}}
-{{end -}}
+{{end}}
 
+projects
+{{with .ProjectSummaries -}}
+{{- range . -}}
+- [{{.Duration}}] {{.Ratio}} {{.Name}}
+{{end -}}
+{{end}}
 @@@
 
 ・疑問点や気にかかっていること
